@@ -2,6 +2,7 @@ server:
   port: 8080
 
 spring:
+<<<<<<< HEAD
   application:
     name: vuatrovn
 
@@ -13,10 +14,22 @@ spring:
     password: 
 
   # 2. Bật H2 Console để xem dữ liệu (truy cập /h2-console)
+=======
+  datasource:
+    url: jdbc:h2:mem:vuatrodb
+    driverClassName: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+>>>>>>> 32137ab80f1d68d69ef445ca829c9f574ef91899
   h2:
     console:
       enabled: true
       path: /h2-console
+<<<<<<< HEAD
       settings:
         web-allow-others: true
 
@@ -42,3 +55,9 @@ springdoc:
     path: /swagger-ui.html
     enabled: true
     
+=======
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+>>>>>>> 32137ab80f1d68d69ef445ca829c9f574ef91899
