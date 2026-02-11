@@ -1,5 +1,8 @@
 package fpt.ntu.vuatrovn.entity;
 
+import fpt.ntu.vuatrovn.enums.Provider;
+import fpt.ntu.vuatrovn.enums.Role;
+import fpt.ntu.vuatrovn.enums.UserStatus;
 import jakarta.persistence.*;
 
 @Entity
@@ -13,20 +16,26 @@ public class User {
     private String username;
     private String password;
     private String email;
+    private String phone;
+
     // OAuth2
-    @Column(nullable = false)
-    private String provider;     // local | google | facebook
+    @Enumerated(EnumType.STRING)
+    private Provider provider;
 
-    @Column(nullable = false)
-    private String providerId;   // sub từ Google
-
+    @Column(nullable = true)
+    private String providerId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
      private UserStatus status;
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+
 
     // ===== SETTERS =====
+
     public String getUsername() {
         return username;
     }
@@ -55,17 +64,34 @@ public class User {
         this.status = status;
     }
 
-    public String getProvider() {
-        return provider;
-    }
-    public void setProvider(String provider) {
-        this.provider = provider;
-    }
-
     public String getProviderId() {
         return providerId;
     }
     public void setProviderId(String providerId) {
         this.providerId = providerId;
+    }
+
+        public Role getRole() {
+        return this.role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+        public String getPhone() {
+        return this.phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public Provider getProvider() {
+        return this.provider;
+    }
+
+    public void setProvider(Provider provider) {
+        this.provider = provider;
     }
 }

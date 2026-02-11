@@ -1,12 +1,18 @@
 package fpt.ntu.vuatrovn.config;
 
 import fpt.ntu.vuatrovn.service.CustomOAuth2UserService;
+
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;    
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;  
+import org.springframework.web.filter.CorsFilter;  
 
 
 @Configuration
@@ -19,6 +25,7 @@ public class SecurityConfig {
     ) throws Exception {
 
         http
+            .cors(cors -> {})
             .csrf(csrf -> csrf.disable())
 
             .authorizeHttpRequests(auth -> auth
@@ -29,14 +36,16 @@ public class SecurityConfig {
                     "/login/**",
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
-                    "/h2-console/**"
+                    "/h2-console/**",
+                    "/swagger-ui.html",
+                    "/api/auth/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
 
             // 🔑 GOOGLE LOGIN
             .oauth2Login(oauth -> oauth
-                .defaultSuccessUrl("/home", true) // ⭐ quan trọng
+                .defaultSuccessUrl("/home", false) // ⭐ quan trọng
                 .userInfoEndpoint(userInfo ->
                     userInfo.userService(oAuth2UserService)
                 )
@@ -53,6 +62,24 @@ public class SecurityConfig {
             );
 
         return http.build();
+    }
+
+    @Bean
+    public CorsFilter corsFilter() {
+
+        CorsConfiguration config = new CorsConfiguration();
+
+        config.setAllowCredentials(true);
+        config.setAllowedOriginPatterns(List.of("*")); 
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedMethods(List.of("*"));
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration("/**", config);
+
+        return new CorsFilter(source);
     }
 
     @Bean

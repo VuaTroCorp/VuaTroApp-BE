@@ -1,7 +1,7 @@
 package fpt.ntu.vuatrovn.service;
 
 import fpt.ntu.vuatrovn.entity.User;
-import fpt.ntu.vuatrovn.entity.UserStatus;
+import fpt.ntu.vuatrovn.enums.UserStatus;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
