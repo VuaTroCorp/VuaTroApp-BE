@@ -25,40 +25,38 @@ public class SecurityConfig {
     ) throws Exception {
 
         http
-            .cors(cors -> {})
-            .csrf(csrf -> csrf.disable())
+    .cors(cors -> {})
+    .csrf(csrf -> csrf.disable())
 
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/",
-                    "/oauth2/**",
-                    "/login/**",
-                    "/swagger-ui/**",
-                    "/v3/api-docs/**",
-                    "/h2-console/**",
-                    "/swagger-ui.html",
-                    "/api/auth/**"
-                ).permitAll()
-                .anyRequest().authenticated()
-            )
+    .authorizeHttpRequests(auth -> auth
+        .requestMatchers(
+            "/",
+            "/login/**",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/h2-console/**",
+            "/swagger-ui.html",
+            "/api/auth/**"
+        ).permitAll()
+        .anyRequest().authenticated()
+    )
 
-            // 🔑 GOOGLE LOGIN
-            .oauth2Login(oauth -> oauth
-                .defaultSuccessUrl("/home", false) // ⭐ quan trọng
-                .userInfoEndpoint(userInfo ->
-                    userInfo.userService(oAuth2UserService)
-                )
-            )
+    // 👉 dùng login mặc định
+    .formLogin(form -> form
+        .loginPage("/login")
+        .permitAll()
+    )
 
-            .logout(logout -> logout
-                .logoutSuccessUrl("/")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-            )
+    .logout(logout -> logout
+        .logoutSuccessUrl("/")
+        .invalidateHttpSession(true)
+        .deleteCookies("JSESSIONID")
+    )
 
-            .headers(headers ->
-                headers.frameOptions(frame -> frame.disable())
-            );
+    .headers(headers ->
+        headers.frameOptions(frame -> frame.disable())
+    );
+
 
         return http.build();
     }
