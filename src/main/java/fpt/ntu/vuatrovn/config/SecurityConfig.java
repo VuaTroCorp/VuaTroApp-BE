@@ -29,16 +29,15 @@ public class SecurityConfig {
     .csrf(csrf -> csrf.disable())
 
     .authorizeHttpRequests(auth -> auth
-        .requestMatchers(
-            "/",
-            "/login/**",
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/h2-console/**",
-            "/swagger-ui.html",
-            "/api/auth/**"
-        ).permitAll()
-        .anyRequest().authenticated()
+    .requestMatchers(
+        "/login/**",
+        "/swagger-ui/**",
+        "/v3/api-docs/**",
+        "/h2-console/**",
+        "/swagger-ui.html",
+        "/api/auth/**"
+    ).permitAll()
+    .anyRequest().authenticated()
     )
 
     // 👉 dùng login mặc định
