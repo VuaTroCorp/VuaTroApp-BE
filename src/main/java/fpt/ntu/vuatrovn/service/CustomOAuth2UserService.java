@@ -33,7 +33,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     // ✅ TESTABLE METHOD
      void processOAuth2User(OAuth2User oAuth2User) {
 
-        String provider = "google";
+        Provider provider = Provider.GOOGLE;
         String providerId = oAuth2User.getAttribute("sub");
 
         Optional<User> existingUser =
