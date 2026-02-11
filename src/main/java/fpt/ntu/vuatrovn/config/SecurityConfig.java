@@ -31,7 +31,6 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/",
-                    "/home",
                     "/oauth2/**",
                     "/login/**",
                     "/swagger-ui/**",
@@ -45,7 +44,6 @@ public class SecurityConfig {
 
             // 🔑 GOOGLE LOGIN
             .oauth2Login(oauth -> oauth
-                .defaultSuccessUrl("/home", false) // ⭐ quan trọng
                 .userInfoEndpoint(userInfo ->
                     userInfo.userService(oAuth2UserService)
                 )
