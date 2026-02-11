@@ -44,10 +44,11 @@ public class SecurityConfig {
 
             // 🔑 GOOGLE LOGIN
             .oauth2Login(oauth -> oauth
-                .userInfoEndpoint(userInfo ->
-                    userInfo.userService(oAuth2UserService)
-                )
-            )
+            .loginPage("/login")
+        .userInfoEndpoint(userInfo ->
+        userInfo.userService(oAuth2UserService)
+    )
+)
 
             .logout(logout -> logout
                 .logoutSuccessUrl("/")

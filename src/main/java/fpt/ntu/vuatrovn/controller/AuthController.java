@@ -36,4 +36,11 @@ public class AuthController {
 
     return ResponseEntity.ok("Xác thực email thành công");
     }
+
+    @GetMapping("/login")
+    @ResponseBody
+    public String login() {
+        return "Login page";
+}
+
 }
