@@ -44,11 +44,11 @@ public class SecurityConfig {
 
             // 🔑 GOOGLE LOGIN
             .oauth2Login(oauth -> oauth
-            .loginPage("/login")
-        .userInfoEndpoint(userInfo ->
-        userInfo.userService(oAuth2UserService)
-    )
-)
+                .defaultSuccessUrl("/home", false) // ⭐ quan trọng
+                .userInfoEndpoint(userInfo ->
+                    userInfo.userService(oAuth2UserService)
+                )
+            )
 
             .logout(logout -> logout
                 .logoutSuccessUrl("/")
