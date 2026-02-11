@@ -1,12 +1,12 @@
 package fpt.ntu.vuatrovn.service;
 
-import fpt.ntu.vuatrovn.entity.User;
+import fpt.ntu.vuatrovn.enums.Provider;
 import fpt.ntu.vuatrovn.enums.UserStatus;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import fpt.ntu.vuatrovn.service.CustomOAuth2UserService;
+
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.argThat;
@@ -32,13 +32,13 @@ class CustomOAuth2UserServiceTest {
         when(oAuth2User.getAttribute("email")).thenReturn("test@gmail.com");
         when(oAuth2User.getAttribute("name")).thenReturn("Test User");
 
-        when(userRepository.findByProviderAndProviderId("google", "123"))
+        when(userRepository.findByProviderAndProviderId(Provider.GOOGLE, "123"))
                 .thenReturn(Optional.empty());
 
         service.processOAuth2User(oAuth2User);
 
         verify(userRepository).save(argThat(user ->
-                user.getProvider().equals("google") &&
+                user.getProvider().equals(Provider.GOOGLE) &&
                 user.getProviderId().equals("123") &&
                 user.getEmail().equals("test@gmail.com") &&
                 user.getUsername().equals("Test User") &&
