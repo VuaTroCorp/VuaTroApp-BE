@@ -1,3 +1,44 @@
+server:
+  port: 8080
+
 spring:
   application:
-    name: VuaTroVN-BE
+    name: vuatrovn
+
+  # 1. Cấu hình H2 Database
+  datasource:
+    url: jdbc:h2:mem:vuatrodashboard;DB_CLOSE_DELAY=-1
+    driverClassName: org.h2.Driver
+    username: sa
+    password: 
+
+  # 2. Bật H2 Console để xem dữ liệu (truy cập /h2-console)
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+
+  # 3. Cấu hình JPA & Hibernate
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update # Tự động tạo/cập nhật bảng từ Entity
+    show-sql: true     # Hiện câu lệnh SQL trong log để dễ debug
+    defer-datasource-initialization: true
+
+  # 4. Cấu hình Security (Tạm thời hardcode user để test Login)
+  security:
+    user:
+      name: admin
+      password: password
+
+# 5. Cấu hình Swagger (OpenAPI)
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    
