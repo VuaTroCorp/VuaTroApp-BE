@@ -1,7 +1,9 @@
 package fpt.ntu.vuatrovn.service;
 
 import fpt.ntu.vuatrovn.entity.User;
-import fpt.ntu.vuatrovn.entity.UserStatus;
+import fpt.ntu.vuatrovn.enums.AuthProvider; // Import Enum
+import fpt.ntu.vuatrovn.enums.UserStatus;  // Import Enum
+import fpt.ntu.vuatrovn.enums.UserRole;    // Import Enum
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -29,28 +31,28 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         return oAuth2User;
     }
 
-    // ✅ TESTABLE METHOD
      void processOAuth2User(OAuth2User oAuth2User) {
 
-        String provider = "google";
         String providerId = oAuth2User.getAttribute("sub");
+        // Sửa lỗi: Dùng Enum AuthProvider.GOOGLE chứ không dùng chuỗi "google"
+        AuthProvider provider = AuthProvider.GOOGLE; 
 
+        // Sửa lỗi: Tìm theo Enum
         Optional<User> existingUser =
                 userRepository.findByProviderAndProviderId(provider, providerId);
 
         if (existingUser.isPresent()) {
-            return; // ❗ user đã tồn tại → không save
+            return;
         }
 
         User user = new User();
-        user.setProvider(provider);
+        user.setProvider(provider); // Sửa lỗi: set bằng Enum
         user.setProviderId(providerId);
         user.setEmail(oAuth2User.getAttribute("email"));
         user.setUsername(oAuth2User.getAttribute("name"));
-        user.setStatus(UserStatus.ACTIVE);
+        user.setStatus(UserStatus.ACTIVE); // Sửa lỗi: set bằng Enum
+        user.setRole(UserRole.USER); // Mặc định là USER
 
         userRepository.save(user);
     }
-
-    
 }

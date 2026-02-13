@@ -3,7 +3,9 @@ package fpt.ntu.vuatrovn.service;
 import fpt.ntu.vuatrovn.dto.LoginRequest;
 import fpt.ntu.vuatrovn.dto.LoginResponse;
 import fpt.ntu.vuatrovn.entity.User;
-import fpt.ntu.vuatrovn.enums.*;
+import fpt.ntu.vuatrovn.enums.AuthProvider; // Import Enum
+import fpt.ntu.vuatrovn.enums.UserRole;
+import fpt.ntu.vuatrovn.enums.UserStatus;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,39 +33,44 @@ class AuthServiceTest {
 
     @Test
     void login_Success() {
-        // Giả lập dữ liệu
+        // 1. Chuẩn bị dữ liệu giả
         User mockUser = new User();
-        mockUser.setEmail("admin@gmail.com");
-        mockUser.setPasswordHashed("hashed_pass");
-        mockUser.setProvider(AuthProvider.LOCAL);
-        mockUser.setStatus(UserStatus.OPENED);
+        mockUser.setEmail("admin@vuatro.com");
+        
+        // SỬA: Dùng setPassword thay vì setPasswordHashed
+        mockUser.setPassword("hashed_123456"); 
+        
         mockUser.setRole(UserRole.ADMIN);
+        mockUser.setStatus(UserStatus.OPENED);
+        mockUser.setProvider(AuthProvider.LOCAL); // Sửa: Dùng Enum
 
-        // Giả lập hành vi của Mock
-        when(userRepository.findByEmail("admin@gmail.com")).thenReturn(Optional.of(mockUser));
-        when(passwordEncoder.matches("123456", "hashed_pass")).thenReturn(true);
+        // 2. Mock hành vi
+        when(userRepository.findByEmail("admin@vuatro.com")).thenReturn(Optional.of(mockUser));
+        when(passwordEncoder.matches("123456", "hashed_123456")).thenReturn(true);
 
-        // Gọi hàm test
-        LoginResponse response = authService.login(new LoginRequest("admin@gmail.com", "123456"));
+        // 3. Chạy test
+        LoginRequest request = new LoginRequest("admin@vuatro.com", "123456");
+        LoginResponse response = authService.login(request);
 
-        // Kiểm tra kết quả
-        assertEquals("ADMIN", response.getRole());
+        // 4. Kiểm tra
         assertNotNull(response.getToken());
+        assertEquals("ADMIN", response.getRole());
     }
-    
+
     @Test
     void login_Fail_WrongPassword() {
         User mockUser = new User();
-        mockUser.setEmail("admin@gmail.com");
-        mockUser.setPasswordHashed("hashed_pass");
-        mockUser.setProvider(AuthProvider.LOCAL);
+        mockUser.setEmail("admin@vuatro.com");
+        mockUser.setPassword("hashed_123456"); // SỬA
+        mockUser.setProvider(AuthProvider.LOCAL); // SỬA
 
-        when(userRepository.findByEmail("admin@gmail.com")).thenReturn(Optional.of(mockUser));
-        when(passwordEncoder.matches("wrong_pass", "hashed_pass")).thenReturn(false);
+        when(userRepository.findByEmail("admin@vuatro.com")).thenReturn(Optional.of(mockUser));
+        when(passwordEncoder.matches("wrong_pass", "hashed_123456")).thenReturn(false);
 
-        // Mong đợi ném ra lỗi
-        assertThrows(RuntimeException.class, () -> {
-            authService.login(new LoginRequest("admin@gmail.com", "wrong_pass"));
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            authService.login(new LoginRequest("admin@vuatro.com", "wrong_pass"));
         });
+
+        assertEquals("Mật khẩu không chính xác", exception.getMessage());
     }
 }

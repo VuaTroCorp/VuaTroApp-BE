@@ -16,13 +16,16 @@ public class DatabaseSeeder {
     @Bean
     CommandLineRunner initDatabase(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
-            // Kiểm tra xem đã có user nào chưa, nếu chưa thì tạo Admin mẫu
             if (userRepository.count() == 0) {
                 User admin = new User();
                 admin.setEmail("admin@vuatro.com");
-                admin.setName("Super Admin");
-                // Mật khẩu là 123456, mã hóa trước khi lưu
-                admin.setPasswordHashed(passwordEncoder.encode("123456"));
+                
+                // Sửa lỗi: setName -> setUsername
+                admin.setUsername("Super Admin"); 
+                
+                // Sửa lỗi: setPasswordHashed -> setPassword
+                admin.setPassword(passwordEncoder.encode("123456")); 
+                
                 admin.setRole(UserRole.ADMIN);
                 admin.setStatus(UserStatus.OPENED);
                 admin.setProvider(AuthProvider.LOCAL);
