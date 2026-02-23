@@ -3,7 +3,8 @@ package fpt.ntu.vuatrovn.service;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import fpt.ntu.vuatrovn.entity.User;
-import fpt.ntu.vuatrovn.entity.UserStatus;
+import fpt.ntu.vuatrovn.enums.Provider;
+import fpt.ntu.vuatrovn.enums.UserStatus;
 import fpt.ntu.vuatrovn.entity.VerificationToken;
 import fpt.ntu.vuatrovn.dto.SignupRequest;
 import fpt.ntu.vuatrovn.repository.UserRepository;
@@ -28,47 +29,72 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
     }
+
+    // ===== VERIFY EMAIL =====
     public void verifyEmail(String token) {
 
-        VerificationToken verificationToken =
-                tokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid token"));
+        VerificationToken vt =
+            tokenRepository.findByToken(token)
+            .orElseThrow(() ->
+                new RuntimeException("Token không hợp lệ"));
 
-        User user = verificationToken.getUser();
+        if (vt.getExpiryDate()
+                .isBefore(LocalDateTime.now())) {
+
+            throw new RuntimeException("Token đã hết hạn");
+        }
+
+        User user = vt.getUser();
         user.setStatus(UserStatus.ACTIVE);
 
         userRepository.save(user);
 
-        tokenRepository.delete(verificationToken); // optional nhưng rất nên
+        tokenRepository.delete(vt);
     }
+
+    // ===== SIGNUP =====
     public User signup(SignupRequest request) {
 
-         User user = new User();
-    user.setUsername(request.getUsername());
-    user.setEmail(request.getEmail());
-    user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setProvider("local");
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email đã tồn tại");
+        }
+
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new RuntimeException("Username đã tồn tại");
+        }
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+
+        user.setPassword(
+            passwordEncoder.encode(request.getPassword())
+        );
+
+        user.setProvider(Provider.LOCAL);
         user.setProviderId(null);
-    user.setStatus(UserStatus.PENDING); // 🔴 chưa verify
+        user.setStatus(UserStatus.PENDING);
 
-
-        // 1️⃣ Lưu user trước
         User savedUser = userRepository.save(user);
 
-        // 2️⃣ Tạo token
+        // tạo token
         String token = UUID.randomUUID().toString();
 
         VerificationToken vt = new VerificationToken();
         vt.setToken(token);
         vt.setUser(savedUser);
-        vt.setExpiryDate(LocalDateTime.now().plusMinutes(15));
+        vt.setExpiryDate(
+            LocalDateTime.now().plusMinutes(15)
+        );
 
         tokenRepository.save(vt);
 
-        // 3️⃣ Gửi email
-        emailService.sendVerificationEmail(savedUser.getEmail(), token);
+        // gửi mail
+        emailService.sendVerificationEmail(
+            savedUser.getEmail(),
+            token
+        );
 
-        // 4️⃣ Return
         return savedUser;
     }
 }

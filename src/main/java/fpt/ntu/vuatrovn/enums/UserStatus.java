@@ -1,8 +1,8 @@
-package fpt.ntu.vuatrovn.entity;
+package fpt.ntu.vuatrovn.enums;
 
 public enum UserStatus {
      ACTIVE,
     INACTIVE,
     PENDING,
-    BLOCKED
+    BANNED
 }

@@ -1,7 +1,8 @@
 package fpt.ntu.vuatrovn.service;
 
 import fpt.ntu.vuatrovn.entity.User;
-import fpt.ntu.vuatrovn.entity.UserStatus;
+import fpt.ntu.vuatrovn.enums.Provider;
+import fpt.ntu.vuatrovn.enums.UserStatus;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -32,7 +33,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     // ✅ TESTABLE METHOD
      void processOAuth2User(OAuth2User oAuth2User) {
 
-        String provider = "google";
+        Provider provider = Provider.GOOGLE;
         String providerId = oAuth2User.getAttribute("sub");
 
         Optional<User> existingUser =
@@ -43,7 +44,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
 
         User user = new User();
-        user.setProvider(provider);
+        user.setProvider(Provider.GOOGLE);
         user.setProviderId(providerId);
         user.setEmail(oAuth2User.getAttribute("email"));
         user.setUsername(oAuth2User.getAttribute("name"));
