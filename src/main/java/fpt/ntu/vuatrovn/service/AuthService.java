@@ -4,12 +4,15 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 import fpt.ntu.vuatrovn.entity.User;
 import fpt.ntu.vuatrovn.enums.Provider;
+import fpt.ntu.vuatrovn.enums.Role;
 import fpt.ntu.vuatrovn.enums.UserStatus;
 import fpt.ntu.vuatrovn.entity.VerificationToken;
 import fpt.ntu.vuatrovn.dto.SignupRequest;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import fpt.ntu.vuatrovn.repository.VerificationTokenRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
@@ -63,6 +66,12 @@ public class AuthService {
             throw new RuntimeException("Username đã tồn tại");
         }
 
+         // ===== CHECK CONFIRM PASSWORD =====
+      if (!request.getPassword()
+        .equals(request.getConfirmPassword())) {
+    return null;
+        }
+
         User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
@@ -74,6 +83,8 @@ public class AuthService {
         user.setProvider(Provider.LOCAL);
         user.setProviderId(null);
         user.setStatus(UserStatus.PENDING);
+        // ===== SET ROLE MẶC ĐỊNH =====
+        user.setRole(Role.USER);
 
         User savedUser = userRepository.save(user);
 

@@ -4,15 +4,15 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
-import static org.springframework.security.config.Customizer.withDefaults;
-
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 public class SecurityConfig {
@@ -21,30 +21,37 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-            .cors(cors -> {})
+            // 🔥 REST API => disable CSRF
             .csrf(csrf -> csrf.disable())
 
+            // 🔥 Enable CORS
+            .cors(cors -> {})
+
+            // 🔥 REST API => No Session
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+
+            // 🔥 Authorization
             .authorizeHttpRequests(auth -> auth
+
+                // Cho phép preflight request
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                // Public APIs
                 .requestMatchers(
-                    "/login/**",
-                    "/swagger-ui/**",
-                    "/v3/api-docs/**",
-                    "/h2-console/**",
-                    "/swagger-ui.html",
-                    "/api/auth/**"
+                        "/api/auth/**",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/swagger-ui.html",
+                        "/h2-console/**"
                 ).permitAll()
+
+                // Các request còn lại cần login
                 .anyRequest().authenticated()
             )
 
-            // ✅ default login page của Spring
-            .formLogin(withDefaults())
-
-            .logout(logout -> logout
-                .logoutSuccessUrl("/")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-            )
-
+            // Cho H2 console
             .headers(headers ->
                 headers.frameOptions(frame -> frame.disable())
             );
@@ -52,13 +59,14 @@ public class SecurityConfig {
         return http.build();
     }
 
+    // 🔥 CORS Configuration chuẩn
     @Bean
-    public CorsFilter corsFilter() {
+    public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("*"));
+        config.setAllowCredentials(false);
+        config.setAllowedOriginPatterns(List.of("*")); // dùng pattern thay vì origins
         config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(List.of("*"));
 
@@ -67,7 +75,7 @@ public class SecurityConfig {
 
         source.registerCorsConfiguration("/**", config);
 
-        return new CorsFilter(source);
+        return source;
     }
 
     @Bean
