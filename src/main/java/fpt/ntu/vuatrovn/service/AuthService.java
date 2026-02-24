@@ -67,9 +67,12 @@ public class AuthService {
         }
 
          // ===== CHECK CONFIRM PASSWORD =====
-      if (!request.getPassword()
+        if (!request.getPassword()
         .equals(request.getConfirmPassword())) {
-    return null;
+            throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "Mật khẩu không khớp"
+            );
         }
 
         User user = new User();

@@ -1,7 +1,6 @@
 package fpt.ntu.vuatrovn.controller;
 
 import fpt.ntu.vuatrovn.dto.SignupRequest;
-import fpt.ntu.vuatrovn.entity.User;
 import fpt.ntu.vuatrovn.service.AuthService;
 
 import org.springframework.http.ResponseEntity;
@@ -23,14 +22,8 @@ public class AuthController {
     // =========================
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequest request) {
-
-    User user = authService.signup(request);
-
-    if (user == null) {
-        return ResponseEntity.badRequest().body("Mật khẩu không khớp");
-    }
-
-    return ResponseEntity.ok("Signup success");
+        authService.signup(request); 
+        return ResponseEntity.ok("Signup success");
     }
 
     // =========================
