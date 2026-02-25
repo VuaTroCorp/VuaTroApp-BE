@@ -11,6 +11,15 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import fpt.ntu.vuatrovn.entity.User;
+import fpt.ntu.vuatrovn.enums.Provider;
+import fpt.ntu.vuatrovn.enums.UserStatus;
+import fpt.ntu.vuatrovn.entity.VerificationToken;
+import fpt.ntu.vuatrovn.dto.SignupRequest;
+import fpt.ntu.vuatrovn.repository.UserRepository;
+import fpt.ntu.vuatrovn.repository.VerificationTokenRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 public class AuthService {
@@ -31,63 +40,72 @@ public class AuthService {
         this.emailService = emailService;
     }
 
-    // --- 1. LOGIN (Của bạn - Đã update để dùng logic mới) ---
-    public LoginResponse login(LoginRequest request) {
-        // Tìm user
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
+    // ===== VERIFY EMAIL =====
+    public void verifyEmail(String token) {
 
-        // Check Provider
-        if (user.getProvider() != AuthProvider.LOCAL) {
-            throw new RuntimeException("Vui lòng đăng nhập bằng Google");
+        VerificationToken vt =
+            tokenRepository.findByToken(token)
+            .orElseThrow(() ->
+                new RuntimeException("Token không hợp lệ"));
+
+        if (vt.getExpiryDate()
+                .isBefore(LocalDateTime.now())) {
+
+            throw new RuntimeException("Token đã hết hạn");
         }
+
+        User user = vt.getUser();
+        user.setStatus(UserStatus.ACTIVE);
 
         // Check Pass
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Mật khẩu không chính xác");
         }
 
-        // Check Status (Hỗ trợ cả logic cũ và mới)
-        if (user.getStatus() == UserStatus.LOCK) {
-            throw new RuntimeException("Tài khoản đã bị khóa");
-        }
-        if (user.getStatus() == UserStatus.PENDING) {
-            throw new RuntimeException("Vui lòng xác thực email trước khi đăng nhập");
-        }
-
-        // Tạo token
-        String token = UUID.randomUUID().toString();
-        // Xử lý null role cho an toàn
-        String roleName = (user.getRole() != null) ? user.getRole().name() : "USER";
-
-        return new LoginResponse(token, roleName, "Đăng nhập thành công");
+        tokenRepository.delete(vt);
     }
 
-    // --- 2. SIGNUP (Của nhóm - Đã sửa để dùng Enum) ---
+    // ===== SIGNUP =====
     public User signup(SignupRequest request) {
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email đã tồn tại");
+        }
+
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new RuntimeException("Username đã tồn tại");
+        }
+
         User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        
-        // Sửa: Dùng Enum thay vì String "local"
-        user.setProvider(AuthProvider.LOCAL); 
+
+        user.setPassword(
+            passwordEncoder.encode(request.getPassword())
+        );
+
+        user.setProvider(Provider.LOCAL);
         user.setProviderId(null);
-        user.setStatus(UserStatus.PENDING); 
-        user.setRole(UserRole.USER); // Mặc định là USER
+        user.setStatus(UserStatus.PENDING);
 
         User savedUser = userRepository.save(user);
 
-        // Tạo token xác thực
+        // tạo token
         String token = UUID.randomUUID().toString();
         VerificationToken vt = new VerificationToken();
         vt.setToken(token);
         vt.setUser(savedUser);
-        vt.setExpiryDate(LocalDateTime.now().plusMinutes(15));
+        vt.setExpiryDate(
+            LocalDateTime.now().plusMinutes(15)
+        );
+
         tokenRepository.save(vt);
 
-        // Gửi email
-        emailService.sendVerificationEmail(savedUser.getEmail(), token);
+        // gửi mail
+        emailService.sendVerificationEmail(
+            savedUser.getEmail(),
+            token
+        );
 
         return savedUser;
     }

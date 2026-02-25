@@ -3,8 +3,8 @@ package fpt.ntu.vuatrovn.service;
 import fpt.ntu.vuatrovn.dto.LoginRequest;
 import fpt.ntu.vuatrovn.dto.LoginResponse;
 import fpt.ntu.vuatrovn.entity.User;
-import fpt.ntu.vuatrovn.enums.AuthProvider; // Import Enum
-import fpt.ntu.vuatrovn.enums.UserRole;
+import fpt.ntu.vuatrovn.enums.Provider; // Đã sửa thành Provider
+import fpt.ntu.vuatrovn.enums.Role; // Đã sửa thành Role
 import fpt.ntu.vuatrovn.enums.UserStatus;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -40,9 +40,10 @@ class AuthServiceTest {
         // SỬA: Dùng setPassword thay vì setPasswordHashed
         mockUser.setPassword("hashed_123456"); 
         
-        mockUser.setRole(UserRole.ADMIN);
-        mockUser.setStatus(UserStatus.OPENED);
-        mockUser.setProvider(AuthProvider.LOCAL); // Sửa: Dùng Enum
+        // Đã cập nhật lại các Enum theo code mới của nhóm
+        mockUser.setRole(Role.ADMIN);
+        mockUser.setStatus(UserStatus.ACTIVE);
+        mockUser.setProvider(Provider.LOCAL); 
 
         // 2. Mock hành vi
         when(userRepository.findByEmail("admin@vuatro.com")).thenReturn(Optional.of(mockUser));
@@ -50,6 +51,8 @@ class AuthServiceTest {
 
         // 3. Chạy test
         LoginRequest request = new LoginRequest("admin@vuatro.com", "123456");
+        
+        // LƯU Ý: Chỗ này có thể vẫn báo đỏ nếu nhóm bạn đã đổi tên hàm login
         LoginResponse response = authService.login(request);
 
         // 4. Kiểm tra
@@ -61,13 +64,14 @@ class AuthServiceTest {
     void login_Fail_WrongPassword() {
         User mockUser = new User();
         mockUser.setEmail("admin@vuatro.com");
-        mockUser.setPassword("hashed_123456"); // SỬA
-        mockUser.setProvider(AuthProvider.LOCAL); // SỬA
+        mockUser.setPassword("hashed_123456"); 
+        mockUser.setProvider(Provider.LOCAL); // Đã cập nhật
 
         when(userRepository.findByEmail("admin@vuatro.com")).thenReturn(Optional.of(mockUser));
         when(passwordEncoder.matches("wrong_pass", "hashed_123456")).thenReturn(false);
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
+            // LƯU Ý: Chỗ này có thể vẫn báo đỏ nếu nhóm bạn đã đổi tên hàm login
             authService.login(new LoginRequest("admin@vuatro.com", "wrong_pass"));
         });
 

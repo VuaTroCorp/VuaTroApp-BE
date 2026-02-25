@@ -1,55 +1,55 @@
 package fpt.ntu.vuatrovn.controller;
 
-import fpt.ntu.vuatrovn.dto.*;
-import fpt.ntu.vuatrovn.entity.User;
-import fpt.ntu.vuatrovn.service.AuthService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import fpt.ntu.vuatrovn.dto.LoginRequest;  // Mới thêm
+import fpt.ntu.vuatrovn.dto.LoginResponse; // Mới thêm
+import fpt.ntu.vuatrovn.dto.SignupRequest;
+import fpt.ntu.vuatrovn.service.AuthService;
 
 @RestController
 @RequestMapping("/api/auth")
-@Tag(name = "Authentication", description = "API Xác thực (Login/Signup/Verify)")
+@CrossOrigin("*")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
 
-    // --- LOGIN (Của bạn) ---
-    @Operation(summary = "Đăng nhập hệ thống", description = "Kiểm tra Email/Pass, trả về Token")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Thành công"),
-        @ApiResponse(responseCode = "400", description = "Lỗi dữ liệu")
-    })
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        try {
-            return ResponseEntity.ok(authService.login(request));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
-    // --- SIGNUP (Của nhóm) ---
-    @Operation(summary = "Đăng ký tài khoản", description = "Tạo tài khoản mới và gửi email xác thực")
+    // =========================
+    // 1️⃣ SIGNUP (ĐĂNG KÝ)
+    // =========================
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequest request) {
-        return ResponseEntity.ok(authService.signup(request));
+        authService.signup(request); 
+        return ResponseEntity.ok("Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt.");
     }
 
-    // --- VERIFY (Của nhóm) ---
-    @Operation(summary = "Xác thực Email", description = "API được gọi khi user bấm link trong email")
+    // =========================
+    // 2️⃣ VERIFY EMAIL (XÁC THỰC)
+    // =========================
     @GetMapping("/verify")
-    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
-        try {
-            authService.verifyEmail(token);
-            return ResponseEntity.ok("Email verified successfully");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<?> verify(@RequestParam String token) {
+        authService.verifyEmail(token);
+        return ResponseEntity.ok("Xác thực email thành công! Bạn có thể đăng nhập ngay bây giờ.");
+    }
+
+    // =========================
+    // 3️⃣ LOGIN (ĐĂNG NHẬP) - MỚI THÊM
+    // =========================
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        // Gọi hàm login bên Service mà chúng ta vừa viết lúc nãy
+        LoginResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
     }
 }

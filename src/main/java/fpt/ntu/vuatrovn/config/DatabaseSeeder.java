@@ -1,8 +1,8 @@
 package fpt.ntu.vuatrovn.config;
 
 import fpt.ntu.vuatrovn.entity.User;
-import fpt.ntu.vuatrovn.enums.AuthProvider;
-import fpt.ntu.vuatrovn.enums.UserRole;
+import fpt.ntu.vuatrovn.enums.Provider;
+import fpt.ntu.vuatrovn.enums.Role;
 import fpt.ntu.vuatrovn.enums.UserStatus;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -26,9 +26,10 @@ public class DatabaseSeeder {
                 // Sửa lỗi: setPasswordHashed -> setPassword
                 admin.setPassword(passwordEncoder.encode("123456")); 
                 
-                admin.setRole(UserRole.ADMIN);
-                admin.setStatus(UserStatus.OPENED);
-                admin.setProvider(AuthProvider.LOCAL);
+                // Cập nhật lại các Enum theo code mới của nhóm
+                admin.setRole(Role.ADMIN); 
+                admin.setStatus(UserStatus.ACTIVE); 
+                admin.setProvider(Provider.LOCAL); 
                 
                 userRepository.save(admin);
                 System.out.println("---------------------------------------------");
