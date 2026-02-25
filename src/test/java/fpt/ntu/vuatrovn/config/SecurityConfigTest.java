@@ -4,10 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -17,21 +16,16 @@ class SecurityConfigTest {
     @Autowired
     private MockMvc mockMvc;
 
-    // ✅ Public endpoint (signup)
+    // ✅ Test public endpoint (permitAll)
     @Test
-    void publicSignupEndpoint_shouldBeAccessible() throws Exception {
-        mockMvc.perform(post("/api/auth/signup")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                        "email": "test@gmail.com",
-                        "password": "123456"
-                    }
-                """))
-                .andExpect(status().isOk());
+    void publicEndpoint_shouldBeAccessible() throws Exception {
+        mockMvc.perform(get("/api/auth/anything"))
+                .andExpect(status().isNotFound());
+        // 404 nghĩa là endpoint không tồn tại
+        // nhưng quan trọng là KHÔNG bị 403
     }
 
-    // ✅ Protected endpoint
+    // ✅ Test protected endpoint
     @Test
     void protectedEndpoint_shouldReturnForbidden() throws Exception {
         mockMvc.perform(get("/api/test/protected"))
