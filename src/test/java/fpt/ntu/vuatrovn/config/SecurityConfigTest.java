@@ -18,13 +18,13 @@ class SecurityConfigTest {
 
     @Test
     void publicEndpoint_shouldBeAccessible() throws Exception {
-        mockMvc.perform(get("/login"))
+        mockMvc.perform(get("/api/auth/login"))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void protectedEndpoint_shouldRedirectToLogin() throws Exception {
+    void protectedEndpoint_shouldReturnForbidden() throws Exception {
         mockMvc.perform(get("/home"))
-                .andExpect(status().is3xxRedirection());
+                .andExpect(status().isForbidden());
     }
 }
