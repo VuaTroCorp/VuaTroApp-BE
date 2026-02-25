@@ -1,27 +1,17 @@
 package fpt.ntu.vuatrovn.entity;
 
+import jakarta.persistence.*;
+import lombok.*; // QUAN TRỌNG: Thêm dòng này để dùng @Data, @Builder
 import fpt.ntu.vuatrovn.enums.Provider;
 import fpt.ntu.vuatrovn.enums.Role;
 import fpt.ntu.vuatrovn.enums.UserStatus;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "users")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Data                 // Tự sinh Getter, Setter, toString...
+@NoArgsConstructor    // Tự sinh Constructor không tham số
+@AllArgsConstructor   // Tự sinh Constructor full tham số
+@Builder              // Hỗ trợ Builder pattern
 public class User {
 
     @Id
@@ -34,12 +24,11 @@ public class User {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    // ĐÂY CHÍNH LÀ BIẾN BỊ THIẾU GÂY RA LỖI:
+    // QUAN TRỌNG: Đã thêm lại trường password bị thiếu
     private String password;
 
     private String phone;
 
-    // OAuth2
     @Enumerated(EnumType.STRING)
     private Provider provider;
 
@@ -53,4 +42,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    // Đã xóa hết các hàm Getter/Setter thủ công ở dưới 
+    // vì @Data đã tự động làm việc đó rồi!
 }

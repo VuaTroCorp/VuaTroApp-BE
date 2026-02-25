@@ -1,54 +1,40 @@
 package fpt.ntu.vuatrovn.service;
 
 import fpt.ntu.vuatrovn.entity.User;
-import fpt.ntu.vuatrovn.enums.Provider; // Sửa AuthProvider -> Provider
-import fpt.ntu.vuatrovn.enums.Role;     // Sửa UserRole -> Role
+import fpt.ntu.vuatrovn.enums.Provider;
+import fpt.ntu.vuatrovn.enums.Role;
 import fpt.ntu.vuatrovn.enums.UserStatus;
 import fpt.ntu.vuatrovn.repository.UserRepository;
-import fpt.ntu.vuatrovn.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class CustomOAuth2UserService extends DefaultOAuth2UserService {
-
+public class CustomOAuth2UserService {
     private final UserRepository userRepository;
 
-    @Override
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oauth2User = super.loadUser(userRequest);
-        
-        // Lấy provider (google, facebook...)
-        String providerStr = userRequest.getClientRegistration().getRegistrationId().toUpperCase();
-        Provider provider = Provider.valueOf(providerStr); // Dùng Enum Provider mới
+    public void processOAuth2User(OAuth2User oAuth2User, String registrationId) {
+        String email = oAuth2User.getAttribute("email");
+        String providerId = oAuth2User.getAttribute("sub");
+        String name = oAuth2User.getAttribute("name");
+        Provider provider = Provider.valueOf(registrationId.toUpperCase());
 
-        String email = oauth2User.getAttribute("email");
         Optional<User> userOptional = userRepository.findByEmail(email);
-        User user;
+        User user = userOptional.orElse(new User());
         
-        if(userOptional.isPresent()) {
-            user = userOptional.get();
-            // Update thông tin nếu cần
-            user.setProvider(provider);
-            userRepository.save(user);
-        } else {
-            // Tạo user mới
-            user = new User();
+        if (!userOptional.isPresent()) {
             user.setEmail(email);
-            user.setUsername(email);
-            user.setProvider(provider);
-            user.setRole(Role.USER); // Dùng Enum Role mới
+            user.setUsername(name != null ? name : email);
+            user.setRole(Role.USER);
             user.setStatus(UserStatus.ACTIVE);
-            userRepository.save(user);
+            user.setPassword(""); 
         }
-
-        return UserPrincipal.create(user, oauth2User.getAttributes());
+        user.setProvider(provider);
+        user.setProviderId(providerId);
+        
+        userRepository.save(user);
+        System.out.println("✅ ĐÃ LƯU USER GOOGLE: " + email);
     }
 }
