@@ -118,10 +118,16 @@ package fpt.ntu.vuatrovn.service;
 
 import fpt.ntu.vuatrovn.dto.*;
 import fpt.ntu.vuatrovn.entity.User;
+import fpt.ntu.vuatrovn.enums.Provider;
+import fpt.ntu.vuatrovn.enums.Role;
+import fpt.ntu.vuatrovn.enums.UserStatus;
 import fpt.ntu.vuatrovn.entity.VerificationToken;
 import fpt.ntu.vuatrovn.enums.*;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import fpt.ntu.vuatrovn.repository.VerificationTokenRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -156,6 +162,15 @@ public class AuthService {
             throw new RuntimeException("Username đã tồn tại");
         }
 
+         // ===== CHECK CONFIRM PASSWORD =====
+        if (!request.getPassword()
+        .equals(request.getConfirmPassword())) {
+            throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "Mật khẩu không khớp"
+            );
+        }
+
         User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
@@ -167,7 +182,9 @@ public class AuthService {
         
         user.setProvider(Provider.LOCAL);
         user.setProviderId(null);
-        user.setStatus(UserStatus.PENDING); 
+        user.setStatus(UserStatus.PENDING);
+        // ===== SET ROLE MẶC ĐỊNH =====
+        user.setRole(Role.USER);
 
         User savedUser = userRepository.save(user);
 

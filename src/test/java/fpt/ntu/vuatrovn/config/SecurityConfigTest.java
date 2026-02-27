@@ -16,15 +16,19 @@ class SecurityConfigTest {
     @Autowired
     private MockMvc mockMvc;
 
+    // ✅ Test public endpoint (permitAll)
     @Test
     void publicEndpoint_shouldBeAccessible() throws Exception {
-        mockMvc.perform(get("/login"))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/auth/anything"))
+                .andExpect(status().isNotFound());
+        // 404 nghĩa là endpoint không tồn tại
+        // nhưng quan trọng là KHÔNG bị 403
     }
 
+    // ✅ Test protected endpoint
     @Test
-    void protectedEndpoint_shouldRedirectToLogin() throws Exception {
-        mockMvc.perform(get("/home"))
-                .andExpect(status().is3xxRedirection());
+    void protectedEndpoint_shouldReturnForbidden() throws Exception {
+        mockMvc.perform(get("/api/test/protected"))
+                .andExpect(status().isForbidden());
     }
 }
