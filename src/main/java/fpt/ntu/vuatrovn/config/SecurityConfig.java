@@ -1,6 +1,7 @@
 package fpt.ntu.vuatrovn.config;
 
 import fpt.ntu.vuatrovn.service.CustomOAuth2UserService;
+import jakarta.servlet.http.HttpServletResponse; // 🔥 Import quan trọng
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -33,20 +34,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // 1. Tắt CSRF vì chúng ta làm REST API
             .csrf(csrf -> csrf.disable())
-            
-            // 2. Cấu hình CORS (Lấy từ Bean corsConfigurationSource bên dưới)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-            // 3. Quản lý Session: OAuth2 cần Session để duy trì đăng nhập
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
             )
 
-            // 4. Phân quyền API
+            // 🔥 PHẦN SỬA LỖI: Trả về 403 thay vì redirect 302
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.getWriter().write("Access Denied: Please login first.");
+                })
+            )
+
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Hỗ trợ CORS pre-flight
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
                     "/", "/home", "/login/**", "/oauth2/**", 
                     "/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", 
@@ -54,8 +57,6 @@ public class SecurityConfig {
                 ).permitAll()
                 .anyRequest().authenticated()
             )
-
-            // 5. Cấu hình Google OAuth2 Login
             .oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(withDefaults())
                 .successHandler((request, response, authentication) -> {
@@ -63,9 +64,7 @@ public class SecurityConfig {
                     String registrationId = ((OAuth2AuthenticationToken) authentication)
                             .getAuthorizedClientRegistrationId();
 
-                    // Gọi service để lưu user vào Database
                     customOAuth2UserService.processOAuth2User(oAuth2User, registrationId);
-                    
                     response.sendRedirect("/");
                 })
                 .failureHandler((request, response, exception) -> {
@@ -73,18 +72,15 @@ public class SecurityConfig {
                     response.sendRedirect("/login?error");
                 })
             )
-            
-            // 6. Cho phép H2 Console hiển thị trong Frame
             .headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
         return http.build();
     }
 
-    // 🔥 Cấu hình CORS chuẩn để Frontend có thể gọi API
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true); // Cho phép gửi Cookie/Token
+        config.setAllowCredentials(true);
         config.setAllowedOriginPatterns(List.of("*")); 
         config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
