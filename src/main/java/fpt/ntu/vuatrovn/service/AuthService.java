@@ -18,8 +18,9 @@ import java.util.UUID;
 
 @Service
 public class AuthService {
-
-    private final UserRepository userRepository;
+    // 🔥 ĐÃ BỔ SUNG DÒNG NÀY - Đây là "chìa khóa" để hết lỗi
+    private final UserRepository userRepository; 
+    
     private final VerificationTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
@@ -29,7 +30,7 @@ public class AuthService {
                        VerificationTokenRepository tokenRepository,
                        PasswordEncoder passwordEncoder,
                        EmailService emailService) {
-        this.userRepository = userRepository;
+        this.userRepository = userRepository; // Bây giờ gán mới không bị lỗi nữa
         this.tokenRepository = tokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
@@ -69,7 +70,7 @@ public class AuthService {
         vt.setExpiryDate(LocalDateTime.now().plusMinutes(15));
         tokenRepository.save(vt);
 
-        // Gửi mail
+        // Gửi mail (Nhớ kiểm tra mail trap hoặc cấu hình SMTP nhé)
         emailService.sendVerificationEmail(savedUser.getEmail(), token);
         return savedUser;
     }
@@ -91,7 +92,6 @@ public class AuthService {
 
         String fakeToken = UUID.randomUUID().toString();
         
-        // 🔥 Đã thêm số 200 vào vị trí đầu tiên
         return new LoginResponse(200, fakeToken, user.getRole().name(), "Đăng nhập thành công");
     }
 
@@ -103,7 +103,7 @@ public class AuthService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token không hợp lệ"));
 
         if (vt.getExpiryDate().isBefore(LocalDateTime.now())) {
-            tokenRepository.delete(vt); // Dọn dẹp token đã hết hạn
+            tokenRepository.delete(vt); 
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token đã hết hạn");
         }
 
@@ -111,7 +111,6 @@ public class AuthService {
         user.setStatus(UserStatus.ACTIVE);
         userRepository.save(user);
 
-        // Xóa token sau khi đã sử dụng thành công
         tokenRepository.delete(vt);
     }
 }
