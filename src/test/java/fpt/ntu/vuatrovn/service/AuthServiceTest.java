@@ -3,8 +3,8 @@ package fpt.ntu.vuatrovn.service;
 import fpt.ntu.vuatrovn.dto.LoginRequest;
 import fpt.ntu.vuatrovn.dto.LoginResponse;
 import fpt.ntu.vuatrovn.entity.User;
-import fpt.ntu.vuatrovn.enums.AuthProvider; // Import Enum
-import fpt.ntu.vuatrovn.enums.UserRole;
+import fpt.ntu.vuatrovn.enums.Provider; 
+import fpt.ntu.vuatrovn.enums.Role;
 import fpt.ntu.vuatrovn.enums.UserStatus;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -36,13 +38,12 @@ class AuthServiceTest {
         // 1. Chuẩn bị dữ liệu giả
         User mockUser = new User();
         mockUser.setEmail("admin@vuatro.com");
-        
-        // SỬA: Dùng setPassword thay vì setPasswordHashed
         mockUser.setPassword("hashed_123456"); 
         
-        mockUser.setRole(UserRole.ADMIN);
-        mockUser.setStatus(UserStatus.OPENED);
-        mockUser.setProvider(AuthProvider.LOCAL); // Sửa: Dùng Enum
+        // SỬA: Đã dùng đúng Enum chuẩn
+        mockUser.setRole(Role.ADMIN);
+        mockUser.setStatus(UserStatus.ACTIVE); 
+        mockUser.setProvider(Provider.LOCAL); 
 
         // 2. Mock hành vi
         when(userRepository.findByEmail("admin@vuatro.com")).thenReturn(Optional.of(mockUser));
@@ -61,16 +62,19 @@ class AuthServiceTest {
     void login_Fail_WrongPassword() {
         User mockUser = new User();
         mockUser.setEmail("admin@vuatro.com");
-        mockUser.setPassword("hashed_123456"); // SỬA
-        mockUser.setProvider(AuthProvider.LOCAL); // SỬA
+        mockUser.setPassword("hashed_123456"); 
+        mockUser.setProvider(Provider.LOCAL); // SỬA: Dùng đúng Enum
+        mockUser.setStatus(UserStatus.ACTIVE);
 
         when(userRepository.findByEmail("admin@vuatro.com")).thenReturn(Optional.of(mockUser));
         when(passwordEncoder.matches("wrong_pass", "hashed_123456")).thenReturn(false);
 
-        Exception exception = assertThrows(RuntimeException.class, () -> {
+        // SỬA: Bắt đúng loại Exception và câu thông báo của AuthService
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
             authService.login(new LoginRequest("admin@vuatro.com", "wrong_pass"));
         });
 
-        assertEquals("Mật khẩu không chính xác", exception.getMessage());
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
+        assertEquals("Email hoặc mật khẩu không chính xác", exception.getReason());
     }
 }

@@ -1,6 +1,6 @@
 package fpt.ntu.vuatrovn.enums;
 
-public enum AuthProvider {
+public enum Provider {
     LOCAL,
     GOOGLE
 }

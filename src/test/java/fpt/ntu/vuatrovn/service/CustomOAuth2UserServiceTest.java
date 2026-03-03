@@ -1,0 +1,53 @@
+package fpt.ntu.vuatrovn.service;
+
+import fpt.ntu.vuatrovn.entity.User;
+import fpt.ntu.vuatrovn.enums.Provider;
+import fpt.ntu.vuatrovn.enums.Role;
+import fpt.ntu.vuatrovn.enums.UserStatus;
+import fpt.ntu.vuatrovn.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+
+import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.*;
+
+class CustomOAuth2UserServiceTest {
+
+    private UserRepository userRepository;
+    private CustomOAuth2UserService service;
+
+    @BeforeEach
+    void setUp() {
+        userRepository = mock(UserRepository.class);
+        service = new CustomOAuth2UserService(userRepository);
+    }
+
+    @Test
+    void processOAuth2User_shouldCreateUser_whenUserNotExists() {
+
+        OAuth2User oAuth2User = mock(OAuth2User.class);
+
+        when(oAuth2User.getAttribute("sub")).thenReturn("123");
+        when(oAuth2User.getAttribute("email")).thenReturn("test@gmail.com");
+        when(oAuth2User.getAttribute("name")).thenReturn("Test User");
+
+        // Đã sửa lại thành findByEmail cho khớp với logic thực tế của Service
+        when(userRepository.findByEmail("test@gmail.com"))
+                .thenReturn(Optional.empty());
+
+        // Đã bổ sung tham số thứ 2 là "google"
+        service.processOAuth2User(oAuth2User, "google");
+
+        verify(userRepository).save(argThat(user ->
+                user.getProvider().equals(Provider.GOOGLE) &&
+                user.getProviderId().equals("123") &&
+                user.getEmail().equals("test@gmail.com") &&
+                user.getUsername().equals("Test User") &&
+                user.getStatus() == UserStatus.ACTIVE &&
+                user.getRole() == Role.USER // Kiểm tra thêm Role
+        ));
+    }
+}

@@ -1,14 +1,14 @@
 package fpt.ntu.vuatrovn.entity;
 
-import fpt.ntu.vuatrovn.enums.AuthProvider; // Import Enum
-import fpt.ntu.vuatrovn.enums.UserRole;
+import fpt.ntu.vuatrovn.enums.Provider;
+import fpt.ntu.vuatrovn.enums.Role;
 import fpt.ntu.vuatrovn.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Table(name = "users")
-@Data
+@Data // Đã bao gồm toàn bộ Getter, Setter, toString...
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -24,18 +24,17 @@ public class User {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @Column(name = "password_hashed")
+    // 🔥 Đã bổ sung trường password bị thiếu
+    @Column(name = "password")
     private String password;
 
-    @Column(name = "phone")
     private String phone;
 
-    // --- QUAN TRỌNG: Phải là AuthProvider, không được là String ---
+    // OAuth2
     @Enumerated(EnumType.STRING)
-    @Column(name = "provider")
-    private AuthProvider provider; 
+    private Provider provider;
 
-    @Column(name = "provider_ID")
+    @Column(nullable = true)
     private String providerId;
 
     @Enumerated(EnumType.STRING)
@@ -43,6 +42,6 @@ public class User {
     private UserStatus status; 
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role")
-    private UserRole role;
+    private Role role;
+    
 }
