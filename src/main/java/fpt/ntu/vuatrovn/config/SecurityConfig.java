@@ -1,80 +1,92 @@
 package fpt.ntu.vuatrovn.config;
 
-import java.util.List;
-
+import fpt.ntu.vuatrovn.service.CustomOAuth2UserService;
+import jakarta.servlet.http.HttpServletResponse; // 🔥 Import quan trọng
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
+
+    private final CustomOAuth2UserService customOAuth2UserService;
+
+    public SecurityConfig(CustomOAuth2UserService customOAuth2UserService) {
+        this.customOAuth2UserService = customOAuth2UserService;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
         http
-            // 🔥 REST API => disable CSRF
             .csrf(csrf -> csrf.disable())
-
-            // 🔥 Enable CORS
-            .cors(cors -> {})
-
-            // 🔥 REST API => No Session
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
             )
 
-            // 🔥 Authorization
+            // 🔥 PHẦN SỬA LỖI: Trả về 403 thay vì redirect 302
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.getWriter().write("Access Denied: Please login first.");
+                })
+            )
+
             .authorizeHttpRequests(auth -> auth
-
-                // Cho phép preflight request
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                // Public APIs
                 .requestMatchers(
-                        "/api/auth/**",
-                        "/swagger-ui/**",
-                        "/v3/api-docs/**",
-                        "/swagger-ui.html",
-                        "/h2-console/**"
+                    "/", "/home", "/login/**", "/oauth2/**", 
+                    "/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", 
+                    "/swagger-ui.html", "/h2-console/**"
                 ).permitAll()
-
-                // Các request còn lại cần login
                 .anyRequest().authenticated()
             )
+            .oauth2Login(oauth2 -> oauth2
+                .userInfoEndpoint(withDefaults())
+                .successHandler((request, response, authentication) -> {
+                    OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+                    String registrationId = ((OAuth2AuthenticationToken) authentication)
+                            .getAuthorizedClientRegistrationId();
 
-            // Cho H2 console
-            .headers(headers ->
-                headers.frameOptions(frame -> frame.disable())
-            );
+                    customOAuth2UserService.processOAuth2User(oAuth2User, registrationId);
+                    response.sendRedirect("/");
+                })
+                .failureHandler((request, response, exception) -> {
+                    System.err.println("❌ LỖI ĐĂNG NHẬP GOOGLE: " + exception.getMessage());
+                    response.sendRedirect("/login?error");
+                })
+            )
+            .headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
         return http.build();
     }
 
-    // 🔥 CORS Configuration chuẩn
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-
         CorsConfiguration config = new CorsConfiguration();
-
-        config.setAllowCredentials(false);
-        config.setAllowedOriginPatterns(List.of("*")); // dùng pattern thay vì origins
+        config.setAllowCredentials(true);
+        config.setAllowedOriginPatterns(List.of("*")); 
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowedMethods(List.of("*"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
-
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
-
         return source;
     }
 

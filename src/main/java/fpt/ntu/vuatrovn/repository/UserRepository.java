@@ -1,17 +1,27 @@
 package fpt.ntu.vuatrovn.repository;
+
 import fpt.ntu.vuatrovn.entity.User;
 import fpt.ntu.vuatrovn.enums.Provider;
-
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    boolean existsByEmail(String email);
-    Optional<User> findByUsername(String username);
+    // Tìm user theo Email (dùng cho cả đăng nhập thường và Google)
     Optional<User> findByEmail(String email);
-    Optional<User> findByProviderAndProviderId(Provider provider, String providerId);
-    boolean existsByUsername(String username);
-}
 
+    // Tìm user theo Username
+    Optional<User> findByUsername(String username);
+
+    // Kiểm tra xem Email đã tồn tại chưa (dùng khi đăng ký)
+    boolean existsByEmail(String email);
+
+    // Kiểm tra xem Username đã tồn tại chưa (dùng khi đăng ký)
+    boolean existsByUsername(String username);
+
+    // Tìm user từ Google OAuth2 (Đã chuẩn hóa dùng Enum Provider)
+    Optional<User> findByProviderAndProviderId(Provider provider, String providerId);
+}
