@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -28,6 +29,7 @@ public class Payment {
 
     private LocalDateTime payment_time;
 
+    @ManyToOne
     @JoinColumn(name = "upgrade_id", nullable = false)
     private Upgrade upgrade;
 
