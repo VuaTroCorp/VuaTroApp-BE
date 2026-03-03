@@ -3,8 +3,8 @@ package fpt.ntu.vuatrovn.service;
 import fpt.ntu.vuatrovn.dto.LoginRequest;
 import fpt.ntu.vuatrovn.dto.LoginResponse;
 import fpt.ntu.vuatrovn.entity.User;
-import fpt.ntu.vuatrovn.enums.Provider; // Đã sửa thành Provider
-import fpt.ntu.vuatrovn.enums.Role; // Đã sửa thành Role
+import fpt.ntu.vuatrovn.enums.Provider; 
+import fpt.ntu.vuatrovn.enums.Role;
 import fpt.ntu.vuatrovn.enums.UserStatus;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -36,13 +38,11 @@ class AuthServiceTest {
         // 1. Chuẩn bị dữ liệu giả
         User mockUser = new User();
         mockUser.setEmail("admin@vuatro.com");
-        
-        // SỬA: Dùng setPassword thay vì setPasswordHashed
         mockUser.setPassword("hashed_123456"); 
         
-        // Đã cập nhật lại các Enum theo code mới của nhóm
+        // SỬA: Đã dùng đúng Enum chuẩn
         mockUser.setRole(Role.ADMIN);
-        mockUser.setStatus(UserStatus.ACTIVE);
+        mockUser.setStatus(UserStatus.ACTIVE); 
         mockUser.setProvider(Provider.LOCAL); 
 
         // 2. Mock hành vi
@@ -65,16 +65,18 @@ class AuthServiceTest {
         User mockUser = new User();
         mockUser.setEmail("admin@vuatro.com");
         mockUser.setPassword("hashed_123456"); 
-        mockUser.setProvider(Provider.LOCAL); // Đã cập nhật
+        mockUser.setProvider(Provider.LOCAL); // SỬA: Dùng đúng Enum
+        mockUser.setStatus(UserStatus.ACTIVE);
 
         when(userRepository.findByEmail("admin@vuatro.com")).thenReturn(Optional.of(mockUser));
         when(passwordEncoder.matches("wrong_pass", "hashed_123456")).thenReturn(false);
 
-        Exception exception = assertThrows(RuntimeException.class, () -> {
-            // LƯU Ý: Chỗ này có thể vẫn báo đỏ nếu nhóm bạn đã đổi tên hàm login
+        // SỬA: Bắt đúng loại Exception và câu thông báo của AuthService
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
             authService.login(new LoginRequest("admin@vuatro.com", "wrong_pass"));
         });
 
-        assertEquals("Mật khẩu không chính xác", exception.getMessage());
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
+        assertEquals("Email hoặc mật khẩu không chính xác", exception.getReason());
     }
 }

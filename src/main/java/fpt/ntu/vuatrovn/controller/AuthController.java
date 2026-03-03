@@ -1,5 +1,9 @@
 package fpt.ntu.vuatrovn.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +35,14 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequest request) {
         authService.signup(request);
-        return ResponseEntity.ok("Đăng ký thành công! Vui lòng kiểm tra email.");
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", 201);
+        response.put("message", "Đăng ký thành công. Vui lòng kiểm tra email để xác thực.");
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
     // =========================
@@ -40,14 +51,19 @@ public class AuthController {
     @GetMapping("/verify")
     public ResponseEntity<?> verify(@RequestParam String token) {
         authService.verifyEmail(token);
-        return ResponseEntity.ok("Xác thực email thành công! Bạn có thể đăng nhập ngay.");
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", 200);
+        response.put("message", "Xác thực email thành công");
+
+        return ResponseEntity.ok(response);
     }
 
     // =========================
-    // 3️⃣ LOGIN (ĐĂNG NHẬP)
+    // 3️⃣ LOGIN (ĐĂNG NHẬP) - PHẦN VỪA ĐƯỢC BỔ SUNG
     // =========================
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }

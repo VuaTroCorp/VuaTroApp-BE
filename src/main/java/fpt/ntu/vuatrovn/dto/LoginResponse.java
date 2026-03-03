@@ -8,9 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LoginResponse {
-    private String token;
-    private String role;
-    private String username;
-    private String email;
-    private Long id;
+    private int status;
+    private String token;   // Vé thông hành
+    private String role;    // Chức vụ (ADMIN/USER)
+    private String message; // Lời nhắn (Ví dụ: "Đăng nhập thành công")
 }

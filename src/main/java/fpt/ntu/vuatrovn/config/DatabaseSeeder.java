@@ -1,8 +1,8 @@
 package fpt.ntu.vuatrovn.config;
 
 import fpt.ntu.vuatrovn.entity.User;
-import fpt.ntu.vuatrovn.enums.Provider;
-import fpt.ntu.vuatrovn.enums.Role;
+import fpt.ntu.vuatrovn.enums.Provider; 
+import fpt.ntu.vuatrovn.enums.Role;     
 import fpt.ntu.vuatrovn.enums.UserStatus;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -20,13 +20,10 @@ public class DatabaseSeeder {
                 User admin = new User();
                 admin.setEmail("admin@vuatro.com");
                 
-                // Sửa lỗi: setName -> setUsername
                 admin.setUsername("Super Admin"); 
-                
-                // Sửa lỗi: setPasswordHashed -> setPassword
                 admin.setPassword(passwordEncoder.encode("123456")); 
                 
-                // Cập nhật lại các Enum theo code mới của nhóm
+                // Đã cập nhật lại các Enum theo code mới chuẩn hóa
                 admin.setRole(Role.ADMIN); 
                 admin.setStatus(UserStatus.ACTIVE); 
                 admin.setProvider(Provider.LOCAL); 

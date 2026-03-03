@@ -1,17 +1,18 @@
 package fpt.ntu.vuatrovn.entity;
 
-import jakarta.persistence.*;
-import lombok.*; // QUAN TRỌNG: Thêm dòng này để dùng @Data, @Builder
+// 🔥 CÁC DÒNG IMPORT QUAN TRỌNG ĐÃ ĐƯỢC BỔ SUNG
 import fpt.ntu.vuatrovn.enums.Provider;
 import fpt.ntu.vuatrovn.enums.Role;
 import fpt.ntu.vuatrovn.enums.UserStatus;
+import jakarta.persistence.*; // Dành cho @Entity, @Id, @Column...
+import lombok.*;            // Dành cho @Data, @Builder...
 
 @Entity
 @Table(name = "users")
-@Data                 // Tự sinh Getter, Setter, toString...
-@NoArgsConstructor    // Tự sinh Constructor không tham số
-@AllArgsConstructor   // Tự sinh Constructor full tham số
-@Builder              // Hỗ trợ Builder pattern
+@Data 
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
 
     @Id
@@ -24,7 +25,7 @@ public class User {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    // QUAN TRỌNG: Đã thêm lại trường password bị thiếu
+    @Column(name = "password")
     private String password;
 
     private String phone;
@@ -41,7 +42,4 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role;
-
-    // Đã xóa hết các hàm Getter/Setter thủ công ở dưới 
-    // vì @Data đã tự động làm việc đó rồi!
 }

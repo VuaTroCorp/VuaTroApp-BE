@@ -10,15 +10,18 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    // Tìm user theo email (để đăng nhập)
+    // Tìm user theo Email (dùng cho cả đăng nhập thường và Google)
     Optional<User> findByEmail(String email);
 
-    // Kiểm tra email đã tồn tại chưa (QUAN TRỌNG: Bạn đang thiếu cái này!)
+    // Tìm user theo Username
+    Optional<User> findByUsername(String username);
+
+    // Kiểm tra xem Email đã tồn tại chưa (dùng khi đăng ký)
     boolean existsByEmail(String email);
 
-    // Kiểm tra username đã tồn tại chưa
+    // Kiểm tra xem Username đã tồn tại chưa (dùng khi đăng ký)
     boolean existsByUsername(String username);
 
-    // Tìm user theo Provider (Google/Facebook)
+    // Tìm user từ Google OAuth2 (Đã chuẩn hóa dùng Enum Provider)
     Optional<User> findByProviderAndProviderId(Provider provider, String providerId);
 }
