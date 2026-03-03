@@ -18,7 +18,7 @@ import jakarta.persistence.Table;
 public class Upgrade {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private long upgrade_id;
 
     private LocalDate start_date;
     private LocalDate expiration_date;
@@ -36,11 +36,11 @@ public class Upgrade {
 
     // Getter & Setter
     public long getId() {
-        return this.id;
+        return this.upgrade_id;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setId(long upgrade_id) {
+        this.upgrade_id = upgrade_id;
     }
 
     public LocalDate getStart_date() {
