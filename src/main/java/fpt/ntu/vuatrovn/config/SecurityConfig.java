@@ -1,10 +1,11 @@
 package fpt.ntu.vuatrovn.config;
 
-import fpt.ntu.vuatrovn.service.CustomOAuth2UserService;
-import jakarta.servlet.http.HttpServletResponse; // 🔥 Import quan trọng
-import org.springframework.context.annotation.Bean;
+import java.util.List;
+
+import org.springframework.context.annotation.Bean; // 🔥 Import quan trọng
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import static org.springframework.security.config.Customizer.withDefaults;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -17,9 +18,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
-
-import static org.springframework.security.config.Customizer.withDefaults;
+import fpt.ntu.vuatrovn.service.CustomOAuth2UserService;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -53,7 +53,8 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/", "/home", "/login/**", "/oauth2/**", 
                     "/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", 
-                    "/swagger-ui.html", "/h2-console/**"
+                    "/swagger-ui.html", "/h2-console/**",
+                    "/api/posts/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
