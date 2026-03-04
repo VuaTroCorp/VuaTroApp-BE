@@ -194,7 +194,7 @@ public class AuthService {
            passwordReset.setCountTryOtp(
                    passwordReset.getCountTryOtp() + 1
            );
-           if (passwordReset.getCountTryOtp() > 5){
+           if (passwordReset.getCountTryOtp() >= 5){
                passwordReset.setBlock(true);
            }
            passwordResetRepository.save(passwordReset);
@@ -202,9 +202,6 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Sai mã OTP. Bạn còn " + countTry + " lần thử");
         }
-
-
-
 
         //Tạo reset Token;
         String resetToken = UUID.randomUUID().toString();
