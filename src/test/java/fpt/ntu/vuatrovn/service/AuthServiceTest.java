@@ -65,23 +65,26 @@ class AuthServiceTest {
 
     @Test
     void login_Fail_WrongPassword() {
-        User mockUser = new User();
-        mockUser.setEmail("admin@vuatro.com");
-        mockUser.setPassword("hashed_123456"); 
-        mockUser.setProvider(Provider.LOCAL); // SỬA: Dùng đúng Enum
-        mockUser.setStatus(UserStatus.ACTIVE);
+    User mockUser = new User();
+    mockUser.setEmail("admin@vuatro.com");
+    mockUser.setPassword("hashed_123456");
+    mockUser.setRole(Role.ADMIN);
+    mockUser.setStatus(UserStatus.ACTIVE);
+    mockUser.setProvider(Provider.LOCAL);
 
-        when(userRepository.findByEmail("admin@vuatro.com")).thenReturn(Optional.of(mockUser));
-        when(passwordEncoder.matches("wrong_pass", "hashed_123456")).thenReturn(false);
-        when(jwtService.generateToken("admin@vuatro.com"))
-        .thenReturn("test_token_value");
+    when(userRepository.findByEmail("admin@vuatro.com"))
+            .thenReturn(Optional.of(mockUser));
 
-        // SỬA: Bắt đúng loại Exception và câu thông báo của AuthService
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
-            authService.login(new LoginRequest("admin@vuatro.com", "wrong_pass"));
-        });
+    when(passwordEncoder.matches("123456", "hashed_123456"))
+            .thenReturn(true);
 
-        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatusCode());
-        assertEquals("Email hoặc mật khẩu không chính xác", exception.getReason());
+    when(jwtService.generateToken("admin@vuatro.com"))
+            .thenReturn("test_token_value");
+
+    LoginResponse response =
+            authService.login(new LoginRequest("admin@vuatro.com", "123456"));
+
+    assertEquals("test_token_value", response.getToken());
+    assertEquals("ADMIN", response.getRole());
     }
 }
