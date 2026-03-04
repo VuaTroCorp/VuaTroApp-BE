@@ -30,6 +30,9 @@ class AuthServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private JwtService jwtService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -48,6 +51,8 @@ class AuthServiceTest {
         // 2. Mock hành vi
         when(userRepository.findByEmail("admin@vuatro.com")).thenReturn(Optional.of(mockUser));
         when(passwordEncoder.matches("123456", "hashed_123456")).thenReturn(true);
+        when(jwtService.generateToken("admin@vuatro.com"))
+        .thenReturn("test_token_value");
 
         // 3. Chạy test
         LoginRequest request = new LoginRequest("admin@vuatro.com", "123456");
