@@ -3,7 +3,7 @@ package fpt.ntu.vuatrovn.controller;
 import java.util.HashMap;
 import java.util.Map;
 
-import fpt.ntu.vuatrovn.dto.ChangePasswordRequest;
+import fpt.ntu.vuatrovn.dto.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,9 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import fpt.ntu.vuatrovn.dto.LoginRequest;
-import fpt.ntu.vuatrovn.dto.LoginResponse;
-import fpt.ntu.vuatrovn.dto.SignupRequest;
 import fpt.ntu.vuatrovn.service.AuthService;
 
 @RestController
@@ -71,19 +68,19 @@ public class AuthController {
 
     // 3️⃣ FORGOT PASSWORD (QUÊN MẬT KHẨU)
     @PostMapping("/forgot-password")
-    public ResponseEntity<?> requestPasswordReset(@RequestBody String email){
+    public ResponseEntity<?> requestPasswordReset(@RequestBody ForgotPasswordRequest request){
 //        Check email và tạo otp
-        String content = this.authService.generatePasswordOtpCode(email);
+        String content = this.authService.generatePasswordOtpCode(request);
         return ResponseEntity.ok(content);
     }
 
     // 3️⃣.1 VERIFY OTP CODE (QUÊN MẬT KHẨU)
     @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOtpCode(@RequestBody String optCode)
+    public ResponseEntity<?> verifyOtpCode(@RequestBody VerifyOtpRequest request)
     {
 //        Check mã otp;
-        String resetToken = this.authService.verifyOtpCode(optCode);
-        return ResponseEntity.ok(resetToken);
+        String resetToken = this.authService.verifyOtpCode(request);
+        return ResponseEntity.ok(Map.of("resetToken",resetToken));
     }
 
     // 3️⃣.2 Change Password (QUÊN MẬT KHẨU)

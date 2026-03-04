@@ -30,6 +30,10 @@ public class PasswordReset {
 
     private boolean used;
 
+    private int countTryOtp;
+
+    private boolean block;
+
 //    1️⃣ Khóa ngoại
     @OneToOne
     private User user;
