@@ -1,35 +1,53 @@
 package fpt.ntu.vuatrovn.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
+import java.util.HashMap;
+import java.util.Map;
 
-import fpt.ntu.vuatrovn.service.SupabaseStorageService;
-import java.io.IOException;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import fpt.ntu.vuatrovn.dto.CreatePostRequest;
+import fpt.ntu.vuatrovn.service.PostService;
 
 @RestController
-@RequestMapping("api/test")
+@RequestMapping("api/posts")
 public class PostController {
-    private final SupabaseStorageService storageService;
-
-    public PostController(SupabaseStorageService storageService){
-        this.storageService = storageService;
+    private final PostService postService;
+    public PostController(PostService postService) {
+        this.postService = postService;
     }
+    @PostMapping("/create")
+    public ResponseEntity<?> createPost(
+            @RequestBody CreatePostRequest request,
+            Authentication authentication
+    ) {
 
-    @GetMapping("/test-auth")
-    public String testAuth(Authentication authentication) {
-        return "Current user: " + authentication.getName();
-    }
+        if (authentication == null) {
 
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public String upload(@RequestPart("file") MultipartFile file) throws IOException {
-        return storageService.uploadFile(file);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("status", 401);
+            response.put("message", "Bạn chưa đăng nhập");
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(response);
+        }
+
+        String email = authentication.getName();
+
+        postService.createPost(request, email);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("status", 201);
+        response.put("message", "Tạo bài đăng thành công");
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(response);
     }
-    
 }

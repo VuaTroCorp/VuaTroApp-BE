@@ -1,6 +1,9 @@
 package fpt.ntu.vuatrovn.entity;
 
+import java.util.List;
+
 import fpt.ntu.vuatrovn.enums.PostStatus;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -38,8 +42,19 @@ public class Post {
     @Column(columnDefinition = "LONGTEXT")
     private String decription;
 
-    private Float longitude;
-    private Float atitude;
+    private Double longitude;
+    private Double latitude;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> images;
+
+    public List<Image> getImages() {
+        return this.images;
+    }
+
+    public void setImages(List<Image> images) {
+        this.images = images;
+    }
 
     @ManyToOne
     @JoinColumn(name = "id",nullable = false)
@@ -130,20 +145,20 @@ public class Post {
         this.decription = decription;
     }
 
-    public Float getLongitude() {
+    public Double getLongitude() {
         return this.longitude;
     }
 
-    public void setLongitude(Float longitude) {
+    public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
 
-    public Float getAtitude() {
-        return this.atitude;
+    public Double getAtitude() {
+        return this.latitude;
     }
 
-    public void setAtitude(Float atitude) {
-        this.atitude = atitude;
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
     }
 
         public User getUser() {
