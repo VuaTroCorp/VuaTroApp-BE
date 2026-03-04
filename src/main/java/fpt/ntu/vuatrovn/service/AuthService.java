@@ -24,16 +24,19 @@ public class AuthService {
     private final VerificationTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final JwtService jwtService;
 
     // Constructor Injection
     public AuthService(UserRepository userRepository,
                        VerificationTokenRepository tokenRepository,
                        PasswordEncoder passwordEncoder,
-                       EmailService emailService) {
+                       EmailService emailService,
+                        JwtService jwtService) {
         this.userRepository = userRepository; // Bây giờ gán mới không bị lỗi nữa
         this.tokenRepository = tokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.jwtService = jwtService;
     }
 
     // =========================
@@ -79,20 +82,35 @@ public class AuthService {
     // 2. ĐĂNG NHẬP (LOGIN)
     // =========================
     public LoginResponse login(LoginRequest request) {
+
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Email hoặc mật khẩu không chính xác"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "Email hoặc mật khẩu không chính xác"
+                ));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Email hoặc mật khẩu không chính xác");
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Email hoặc mật khẩu không chính xác"
+            );
         }
 
         if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email!");
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Tài khoản chưa được kích hoạt. Vui lòng kiểm tra email!"
+            );
         }
 
-        String fakeToken = UUID.randomUUID().toString();
-        
-        return new LoginResponse(200, fakeToken, user.getRole().name(), "Đăng nhập thành công");
+        String token = jwtService.generateToken(user.getEmail());
+
+        return new LoginResponse(
+                200,
+                token,
+                user.getRole().name(),
+                "Đăng nhập thành công"
+        );
     }
 
     // =========================
