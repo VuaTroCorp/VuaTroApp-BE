@@ -30,6 +30,9 @@ class AuthServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private JwtService jwtService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -70,6 +73,8 @@ class AuthServiceTest {
 
         when(userRepository.findByEmail("admin@vuatro.com")).thenReturn(Optional.of(mockUser));
         when(passwordEncoder.matches("wrong_pass", "hashed_123456")).thenReturn(false);
+        when(jwtService.generateToken("admin@vuatro.com"))
+        .thenReturn("test_token_value");
 
         // SỬA: Bắt đúng loại Exception và câu thông báo của AuthService
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {

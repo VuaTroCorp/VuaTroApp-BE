@@ -28,7 +28,7 @@ class SecurityConfigTest {
     // ✅ Test protected endpoint
     @Test
     void protectedEndpoint_shouldReturnForbidden() throws Exception {
-        mockMvc.perform(get("/api/test/protected"))
+        mockMvc.perform(get("/test-auth"))
                 .andExpect(status().isForbidden());
     }
 }
