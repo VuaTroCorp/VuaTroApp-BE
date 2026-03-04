@@ -1,11 +1,13 @@
 package fpt.ntu.vuatrovn.service;
 
 import fpt.ntu.vuatrovn.dto.*;
+import fpt.ntu.vuatrovn.entity.PasswordReset;
 import fpt.ntu.vuatrovn.entity.User;
 import fpt.ntu.vuatrovn.entity.VerificationToken;
 import fpt.ntu.vuatrovn.enums.Provider;
 import fpt.ntu.vuatrovn.enums.Role;
 import fpt.ntu.vuatrovn.enums.UserStatus;
+import fpt.ntu.vuatrovn.repository.PasswordResetRepository;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import fpt.ntu.vuatrovn.repository.VerificationTokenRepository;
 import org.springframework.http.HttpStatus;
@@ -13,7 +15,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.SecureRandom;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Service
@@ -24,16 +29,19 @@ public class AuthService {
     private final VerificationTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final PasswordResetRepository passwordResetRepository;
 
     // Constructor Injection
     public AuthService(UserRepository userRepository,
                        VerificationTokenRepository tokenRepository,
                        PasswordEncoder passwordEncoder,
-                       EmailService emailService) {
+                       EmailService emailService,
+                       PasswordResetRepository passwordResetRepository) {
         this.userRepository = userRepository; // Bây giờ gán mới không bị lỗi nữa
         this.tokenRepository = tokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.passwordResetRepository = passwordResetRepository;
     }
 
     // =========================
@@ -113,4 +121,80 @@ public class AuthService {
 
         tokenRepository.delete(vt);
     }
+
+    // 4.Check Email và tạo Otp ( FORGOT PASSWORD)
+    public String generatePasswordOtpCode(String email){
+
+        User user = this.userRepository.findByEmail(email).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST,"Email không tồn tại")
+        );
+
+//        Có thì tạo mã otp
+//        Ramdom mã otp 6 chữ số
+        String optCode = String.format(
+                "%6d",new SecureRandom().nextInt(1_000_000)
+        );
+
+        PasswordReset passwordReset = new PasswordReset();
+        passwordReset.setOtp(optCode);
+        passwordReset.setOtp_expiry(
+                Instant.now().plus(5, ChronoUnit.MINUTES)
+        );
+        passwordReset.setUser(user);
+
+        passwordResetRepository.save(passwordReset);
+        return "Đã gửi mã otp vui lòng check email/database";
+    }
+
+    //4.1 CheckOpt và tạo resetToken;
+    public String verifyOtpCode(String optCode){
+
+        Instant now = Instant.now();
+        // Verify otp
+        PasswordReset passwordReset = this.passwordResetRepository.findByOtp(optCode).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST,"Sai mã OTP")
+        );
+
+        //Check otp xem còn hạn không
+        if (now.isAfter(passwordReset.getOtp_expiry())){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Otp hết hạn. Vui lòng thực hiện lại");
+        }
+        //Tạo reset Token;
+        String resetToken = UUID.randomUUID().toString();
+
+        passwordReset.setResetToken(resetToken);
+        passwordReset.setToken_expiry(
+                Instant.now().plus(5,ChronoUnit.MINUTES)
+        );
+        passwordReset.setVerified(true);
+        passwordReset.setUsed(true);
+        this.passwordResetRepository.save(passwordReset);
+
+        return resetToken;
+    }
+
+    //4.2 Check Reset Token và thay đổi mật khẩu;
+    public String changePassword(ChangePasswordRequest request){
+        //Check reset Token
+        PasswordReset passwordReset = this.passwordResetRepository.findByResetToken(request.getResetToken()).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST,"reset token bị sai")
+        );
+        // kiểm tra token còn hạn không
+        Instant now = Instant.now();
+        if (now.isAfter(passwordReset.getToken_expiry())){
+            passwordResetRepository.delete(passwordReset);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Reset token hết hạn vui lòng thực hiện lại");
+        }
+        // Thực hiện đổi mật khẩu
+        User user = this.userRepository.findById(
+                passwordReset.getUser().getId()
+        ).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,"không tìm thấy email"));
+
+        user.setPassword(request.getNewPassword());
+        userRepository.save(user);
+        passwordResetRepository.delete(passwordReset);
+
+        return "Đổi mật khẩu thành công";
+    }
+
 }

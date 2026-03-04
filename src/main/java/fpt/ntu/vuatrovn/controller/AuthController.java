@@ -3,6 +3,7 @@ package fpt.ntu.vuatrovn.controller;
 import java.util.HashMap;
 import java.util.Map;
 
+import fpt.ntu.vuatrovn.dto.ChangePasswordRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -67,4 +68,40 @@ public class AuthController {
         LoginResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }
+
+    // 3️⃣ FORGOT PASSWORD (QUÊN MẬT KHẨU)
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> requestPasswordReset(@RequestBody String email){
+//        Check email và tạo otp
+        String content = this.authService.generatePasswordOtpCode(email);
+        return ResponseEntity.ok(content);
+    }
+
+    // 3️⃣.1 VERIFY OTP CODE (QUÊN MẬT KHẨU)
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtpCode(@RequestBody String optCode)
+    {
+//        Check mã otp;
+        String resetToken = this.authService.verifyOtpCode(optCode);
+        return ResponseEntity.ok(resetToken);
+    }
+
+    // 3️⃣.2 Change Password (QUÊN MẬT KHẨU)
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request){
+       if (!request.getComfirmPassword().equals(request.getNewPassword())){
+           return ResponseEntity.badRequest().body("Mật khẩu xác nhận không khớp");
+       }
+
+//       Check reset token;
+        String changePassword = this.authService.changePassword(request);
+
+        return ResponseEntity.ok(changePassword);
+    }
+
+
+
+
+
+
 }
