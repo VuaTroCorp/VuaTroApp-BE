@@ -38,8 +38,8 @@ public class AuthService {
                        VerificationTokenRepository tokenRepository,
                        PasswordEncoder passwordEncoder,
                        EmailService emailService,
-                       PasswordResetRepository passwordResetRepository) {
-                        JwtService jwtService) {
+                       PasswordResetRepository passwordResetRepository,
+                       JwtService jwtService) {
         this.userRepository = userRepository; // Bây giờ gán mới không bị lỗi nữa
         this.tokenRepository = tokenRepository;
         this.passwordEncoder = passwordEncoder;
