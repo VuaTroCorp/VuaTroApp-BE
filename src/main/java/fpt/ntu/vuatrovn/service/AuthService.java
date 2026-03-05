@@ -151,7 +151,7 @@ public class AuthService {
             this.passwordResetRepository.save(passwordReset);
             //Gửi mail
             this.emailService.sendOtpEmail(user.getEmail(),optCode);
-            return optCode;
+            return "Mã Otp đã được gửi vui lòng kiểm tra mail của bạn";
         } else if (Instant.now().isAfter(optionalReset.get().getOtp_expiry())){
             this.passwordResetRepository.delete(optionalReset.get());
 //            Tạo bản ghi mới
@@ -164,10 +164,10 @@ public class AuthService {
             this.passwordResetRepository.save(passwordReset);
             //Gửi lại otp
             this.emailService.sendOtpEmail(user.getEmail(),optCode);
-            return optCode;
+            return "Mã Otp đã được gửi vui lòng kiểm tra mail của bạn";
         }
 
-        return optionalReset.get().getOtp();
+        return "Mã Otp đã được gửi vui lòng kiểm tra mail của bạn";
     }
 
     //4.1 Xác thực qua email
