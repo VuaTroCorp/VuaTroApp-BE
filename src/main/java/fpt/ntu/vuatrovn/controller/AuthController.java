@@ -1,20 +1,13 @@
 package fpt.ntu.vuatrovn.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import fpt.ntu.vuatrovn.dto.*;
+import fpt.ntu.vuatrovn.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import fpt.ntu.vuatrovn.service.AuthService;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -74,6 +67,19 @@ public class AuthController {
         return ResponseEntity.ok(content);
     }
 
+    @GetMapping("/verify-otp-mail")
+    public ResponseEntity<?> verifyOtpCode(@RequestParam String otp){
+
+        String resetToken = this.authService.verifyPasswordResetOtpEmail(otp);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", 200);
+        response.put("message", "Xác thực otp thành công");
+        response.put("resetToken",resetToken);
+
+        return ResponseEntity.ok(response);
+    }
+
     // 3️⃣.1 VERIFY OTP CODE (QUÊN MẬT KHẨU)
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtpCode(@RequestBody VerifyOtpRequest request)
@@ -95,10 +101,4 @@ public class AuthController {
 
         return ResponseEntity.ok(changePassword);
     }
-
-
-
-
-
-
 }

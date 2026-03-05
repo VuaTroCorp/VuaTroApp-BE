@@ -141,7 +141,6 @@ public class AuthService {
         if (optionalReset.isEmpty()){
            // Có thì tạo mã otp
 
-
             PasswordReset passwordReset = new PasswordReset();
             passwordReset.setOtp(optCode);
             passwordReset.setOtp_expiry(
@@ -150,6 +149,8 @@ public class AuthService {
             passwordReset.setUser(user);
 
             this.passwordResetRepository.save(passwordReset);
+            //Gửi mail
+            this.emailService.sendOtpEmail(user.getEmail(),optCode);
             return optCode;
         } else if (Instant.now().isAfter(optionalReset.get().getOtp_expiry())){
             this.passwordResetRepository.delete(optionalReset.get());
@@ -161,13 +162,33 @@ public class AuthService {
             );
             passwordReset.setUser(user);
             this.passwordResetRepository.save(passwordReset);
+            //Gửi lại otp
+            this.emailService.sendOtpEmail(user.getEmail(),optCode);
             return optCode;
         }
 
         return optionalReset.get().getOtp();
     }
 
-    //4.1 CheckOpt và tạo resetToken --> nhập sai 5 lần khóa chức năng đổi password cho đến khi otp hết hạn;
+    //4.1 Xác thực qua email
+    public String verifyPasswordResetOtpEmail(String otpCode){
+        PasswordReset passwordReset = this.passwordResetRepository.findByOtp(otpCode);
+        //Tạo reset Token;
+        String resetToken = UUID.randomUUID().toString();
+
+        passwordReset.setResetToken(resetToken);
+        passwordReset.setToken_expiry(Instant.now().plus(5,ChronoUnit.MINUTES));
+        passwordReset.setVerified(true);
+        passwordReset.setUsed(true);
+
+        passwordResetRepository.save(passwordReset);
+
+        return resetToken;
+    }
+
+
+
+    //4.2 CheckOpt và tạo resetToken --> nhập sai 5 lần khóa chức năng đổi password cho đến khi otp hết hạn;
     public String verifyOtpCode(VerifyOtpRequest request){
 
         Instant now = Instant.now();
@@ -217,7 +238,7 @@ public class AuthService {
         return resetToken;
     }
 
-    //4.2 Check Reset Token và thay đổi mật khẩu;
+    //4.3 Check Reset Token và thay đổi mật khẩu;
     public String changePassword(ChangePasswordRequest request){
         //Check reset Token
         PasswordReset passwordReset = this.passwordResetRepository.findByResetToken(request.getResetToken()).orElseThrow(
@@ -241,5 +262,6 @@ public class AuthService {
 
         return "Đổi mật khẩu thành công";
     }
+
 
 }
