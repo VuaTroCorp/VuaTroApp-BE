@@ -18,7 +18,6 @@ import java.util.UUID;
 
 @Service
 public class AuthService {
-    // 🔥 ĐÃ BỔ SUNG DÒNG NÀY - Đây là "chìa khóa" để hết lỗi
     private final UserRepository userRepository; 
     
     private final VerificationTokenRepository tokenRepository;
@@ -32,7 +31,7 @@ public class AuthService {
                        PasswordEncoder passwordEncoder,
                        EmailService emailService,
                         JwtService jwtService) {
-        this.userRepository = userRepository; // Bây giờ gán mới không bị lỗi nữa
+        this.userRepository = userRepository; 
         this.tokenRepository = tokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
@@ -73,7 +72,7 @@ public class AuthService {
         vt.setExpiryDate(LocalDateTime.now().plusMinutes(15));
         tokenRepository.save(vt);
 
-        // Gửi mail (Nhớ kiểm tra mail trap hoặc cấu hình SMTP nhé)
+        // Gửi mail
         emailService.sendVerificationEmail(savedUser.getEmail(), token);
         return savedUser;
     }
