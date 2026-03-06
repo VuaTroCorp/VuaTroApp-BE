@@ -18,21 +18,11 @@ public class PasswordReset {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String otp;
-
-    private Instant otp_expiry;
-
     private String resetToken;
 
     private Instant token_expiry;
 
     private boolean verified;
-
-    private boolean used;
-
-    private int countTryOtp;
-
-    private boolean block;
 
 //    1️⃣ Khóa ngoại
     @OneToOne

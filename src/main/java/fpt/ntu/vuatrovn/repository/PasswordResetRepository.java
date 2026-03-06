@@ -13,6 +13,4 @@ public interface PasswordResetRepository extends JpaRepository<PasswordReset,Lon
 
     Optional<PasswordReset> findByResetToken(String resetToken);
 
-    PasswordReset findByOtp(String otp);
-
 }

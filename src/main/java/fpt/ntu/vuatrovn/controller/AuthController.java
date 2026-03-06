@@ -59,7 +59,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    // 3️⃣ FORGOT PASSWORD (QUÊN MẬT KHẨU)
+    // 4️⃣ FORGOT PASSWORD (QUÊN MẬT KHẨU)
     @PostMapping("/forgot-password")
     public ResponseEntity<?> requestPasswordReset(@RequestBody ForgotPasswordRequest request){
 //        Check email và tạo otp
@@ -67,29 +67,20 @@ public class AuthController {
         return ResponseEntity.ok(content);
     }
 
-    @GetMapping("/verify-otp-mail")
-    public ResponseEntity<?> verifyOtpCode(@RequestParam String otp){
+    @GetMapping("/verify-resettoken-mail")
+    public ResponseEntity<?> verifyResetPasswordEmail(@RequestParam String resetToken){
 
-        String resetToken = this.authService.verifyPasswordResetOtpEmail(otp);
+        String verifyResetPasswordEmail = this.authService.verifyPasswordResetOtpEmail(resetToken);
 
         Map<String, Object> response = new HashMap<>();
         response.put("status", 200);
-        response.put("message", "Xác thực otp thành công");
-        response.put("resetToken",resetToken);
+        response.put("message", "Xác thực thành công");
+        response.put("resetToken",verifyResetPasswordEmail);
 
         return ResponseEntity.ok(response);
     }
 
-    // 3️⃣.1 VERIFY OTP CODE (QUÊN MẬT KHẨU)
-    @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOtpCode(@RequestBody VerifyOtpRequest request)
-    {
-//        Check mã otp;
-        String resetToken = this.authService.verifyOtpCode(request);
-        return ResponseEntity.ok(Map.of("resetToken",resetToken));
-    }
-
-    // 3️⃣.2 Change Password (QUÊN MẬT KHẨU)
+    // 4️⃣.2 Change Password (QUÊN MẬT KHẨU)
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request){
        if (!request.getComfirmPassword().equals(request.getNewPassword())){

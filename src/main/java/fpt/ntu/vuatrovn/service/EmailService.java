@@ -97,10 +97,10 @@ public class EmailService {
         }
     }
 
-    public void sendOtpEmail(String email, String otp) {
+    public void sendOtpEmail(String email, String resetToken) {
 
         String link =
-                "http://localhost:8080/api/auth/verify-otp-mail?otp=" + otp;
+                "http://localhost:8080/api/auth/verify-resettoken-mail?resetToken=" + resetToken;
 
         String htmlContent = """
         <div style="font-family: Arial, sans-serif; padding: 20px;">
@@ -149,7 +149,7 @@ public class EmailService {
             </p>
 
         </div>
-    """.formatted(otp, link, link, link);
+    """.formatted(resetToken, link, link, link);
 
         try {
 

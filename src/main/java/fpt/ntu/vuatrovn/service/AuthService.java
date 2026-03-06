@@ -148,110 +148,59 @@ public class AuthService {
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST,"Email không tồn tại")
         );
 
-//        Kiểm tra xem có otp chưa
+//        Kiểm tra xem có reset token chưa
         Optional<PasswordReset> optionalReset = this.passwordResetRepository.findByUser_Email(request.getEmail());
 
-        //        Ramdom mã otp 6 chữ số
-        String optCode = String.format(
-                "%06d",new SecureRandom().nextInt(1_000_000)
-        );
+        //Ramdom reset token chữ số
+        String resetToken = UUID.randomUUID().toString();
+
 
         if (optionalReset.isEmpty()){
-           // Có thì tạo mã otp
+           // Có thì tạo reset token
 
             PasswordReset passwordReset = new PasswordReset();
-            passwordReset.setOtp(optCode);
-            passwordReset.setOtp_expiry(
-                    Instant.now().plus(5, ChronoUnit.MINUTES)
+            passwordReset.setResetToken(resetToken);
+            passwordReset.setToken_expiry(
+                    Instant.now().plus(5,ChronoUnit.MINUTES)
             );
             passwordReset.setUser(user);
 
             this.passwordResetRepository.save(passwordReset);
             //Gửi mail
-            this.emailService.sendOtpEmail(user.getEmail(),optCode);
-            return "Mã Otp đã được gửi vui lòng kiểm tra mail của bạn";
-        } else if (Instant.now().isAfter(optionalReset.get().getOtp_expiry())){
+            this.emailService.sendOtpEmail(user.getEmail(),resetToken);
+            return "Vui lòng kiểm tra mail";
+        } else if (Instant.now().isAfter(optionalReset.get().getToken_expiry())){
             this.passwordResetRepository.delete(optionalReset.get());
 //            Tạo bản ghi mới
             PasswordReset passwordReset = new PasswordReset();
-            passwordReset.setOtp(optCode);
-            passwordReset.setOtp_expiry(
+            passwordReset.setResetToken(resetToken);
+            passwordReset.setToken_expiry(
                     Instant.now().plus(5, ChronoUnit.MINUTES)
             );
             passwordReset.setUser(user);
             this.passwordResetRepository.save(passwordReset);
             //Gửi lại otp
-            this.emailService.sendOtpEmail(user.getEmail(),optCode);
-            return "Mã Otp đã được gửi vui lòng kiểm tra mail của bạn";
+            this.emailService.sendOtpEmail(user.getEmail(),resetToken);
+            return "Vui lòng kiểm tra mail";
         }
 
-        return "Mã Otp đã được gửi vui lòng kiểm tra mail của bạn";
+        return "Vui lòng kiểm tra mail";
     }
 
     //4.1 Xác thực qua email
-    public String verifyPasswordResetOtpEmail(String otpCode){
-        PasswordReset passwordReset = this.passwordResetRepository.findByOtp(otpCode);
-        //Tạo reset Token;
-        String resetToken = UUID.randomUUID().toString();
+    public String verifyPasswordResetOtpEmail(String resetToken){
+        PasswordReset passwordReset = this.passwordResetRepository.findByResetToken(resetToken).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST,"Reset token không tìm thấy")
+        );
 
-        passwordReset.setResetToken(resetToken);
-        passwordReset.setToken_expiry(Instant.now().plus(5,ChronoUnit.MINUTES));
+//        Check token còn hạn hay ko
+        if (Instant.now().isAfter(passwordReset.getToken_expiry())){
+            this.passwordResetRepository.delete(passwordReset);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Token hết hạn vui lòng thực hiện lại");
+        }
         passwordReset.setVerified(true);
-        passwordReset.setUsed(true);
 
         passwordResetRepository.save(passwordReset);
-
-        return resetToken;
-    }
-
-
-
-    //4.2 CheckOpt và tạo resetToken --> nhập sai 5 lần khóa chức năng đổi password cho đến khi otp hết hạn;
-    public String verifyOtpCode(VerifyOtpRequest request){
-
-        Instant now = Instant.now();
-
-        //Check email tồn tại
-        PasswordReset passwordReset = this.passwordResetRepository.findByUser_Email(request.getEmail()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST,"email không đúng")
-        );
-
-        //Check otp xem còn hạn không
-        if (now.isAfter(passwordReset.getOtp_expiry())){
-            //Hết hạn thì xóa token cũ đi
-            this.passwordResetRepository.delete(passwordReset);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Otp hết hạn. Vui lòng thực hiện lại");
-        }
-
-        if (passwordReset.isBlock()){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"User đang bị block chức năng quên mật khẩu vui lòng thử lại sau 5'");
-        }
-
-
-        //Check mã otp
-        if (!passwordReset.getOtp().equals(request.getOtpCode())){
-           passwordReset.setCountTryOtp(
-                   passwordReset.getCountTryOtp() + 1
-           );
-           if (passwordReset.getCountTryOtp() >= 5){
-               passwordReset.setBlock(true);
-           }
-           passwordResetRepository.save(passwordReset);
-           int countTry = 5 - passwordReset.getCountTryOtp();
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Sai mã OTP. Bạn còn " + countTry + " lần thử");
-        }
-
-        //Tạo reset Token;
-        String resetToken = UUID.randomUUID().toString();
-
-        passwordReset.setResetToken(resetToken);
-        passwordReset.setToken_expiry(
-                Instant.now().plus(5,ChronoUnit.MINUTES)
-        );
-        passwordReset.setVerified(true);
-        passwordReset.setUsed(true);
-        this.passwordResetRepository.save(passwordReset);
 
         return resetToken;
     }
@@ -267,6 +216,11 @@ public class AuthService {
         if (now.isAfter(passwordReset.getToken_expiry())){
             passwordResetRepository.delete(passwordReset);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Reset token hết hạn vui lòng thực hiện lại");
+        }
+
+        //Kiểm tra xem verify có là true chưa
+        if (!passwordReset.isVerified()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Token chưa xác nhận vui lòng kiểm tra mail");
         }
         // Thực hiện đổi mật khẩu
         User user = this.userRepository.findById(
