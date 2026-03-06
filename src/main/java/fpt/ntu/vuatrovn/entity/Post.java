@@ -33,11 +33,15 @@ public class Post {
 
     private Float area;
     private int room_quantity;
-    private String province;
-    private String commune;
+    private String adrress;
 
-    @Column(columnDefinition = "LONGTEXT")
-    private String street;
+    public String getAdrress() {
+        return this.adrress;
+    }
+
+    public void setAdrress(String adrress) {
+        this.adrress = adrress;
+    }
 
     @Column(columnDefinition = "LONGTEXT")
     private String decription;
@@ -113,30 +117,6 @@ public class Post {
         this.room_quantity = room_quantity;
     }
 
-    public String getProvince() {
-        return this.province;
-    }
-
-    public void setProvince(String province) {
-        this.province = province;
-    }
-
-    public String getCommune() {
-        return this.commune;
-    }
-
-    public void setCommune(String commune) {
-        this.commune = commune;
-    }
-
-        public String getStreet() {
-        return this.street;
-    }
-
-    public void setStreet(String street) {
-        this.street = street;
-    }
-
         public String getDecription() {
         return this.decription;
     }
@@ -153,7 +133,7 @@ public class Post {
         this.longitude = longitude;
     }
 
-    public Double getAtitude() {
+    public Double getLatitude() {
         return this.latitude;
     }
 

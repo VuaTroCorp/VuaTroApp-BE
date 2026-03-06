@@ -16,40 +16,41 @@ public class GeocodingService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-public double[] getCoordinates(String address) {
+    public double[] getCoordinates(String address) {
 
-    try {
+        try {
 
-        String encodedAddress = URLEncoder.encode(address, StandardCharsets.UTF_8);
+            String encodedAddress = URLEncoder.encode(address, StandardCharsets.UTF_8);
 
-        String url = "https://nominatim.openstreetmap.org/search?q="
-                + encodedAddress
-                + "&format=json&limit=1";
+            String url = "https://nominatim.openstreetmap.org/search?q="
+                    + encodedAddress
+                    + "&format=json&limit=1&countrycodes=vn";
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("User-Agent", "VuaTroVN");
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("User-Agent", "VuaTroVN");
 
-        HttpEntity<String> entity = new HttpEntity<>(headers);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<String> response =
-                restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            ResponseEntity<String> response =
+                    restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
-        JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
-        JSONArray array = (JSONArray) parser.parse(response.getBody());
+            JSONParser parser = new JSONParser(JSONParser.MODE_PERMISSIVE);
+            JSONArray array = (JSONArray) parser.parse(response.getBody());
 
-        if (array.isEmpty()) {
-            throw new RuntimeException("Không tìm thấy địa chỉ");
+            // ❌ Không tìm thấy địa chỉ
+            if (array.isEmpty()) {
+                throw new RuntimeException("Không tìm thấy địa chỉ: " + address);
+            }
+
+            JSONObject obj = (JSONObject) array.get(0);
+
+            double latitude = Double.parseDouble(obj.getAsString("lat"));
+            double longitude = Double.parseDouble(obj.getAsString("lon"));
+
+            return new double[]{latitude, longitude};
+
+        } catch (Exception e) {
+            throw new RuntimeException("Không tìm thấy vị trí trên bản đồ");
         }
-
-        JSONObject obj = (JSONObject) array.get(0);
-
-        double lat = Double.parseDouble(obj.getAsString("lat"));
-        double lon = Double.parseDouble(obj.getAsString("lon"));
-
-        return new double[]{lat, lon};
-
-    } catch (Exception e) {
-        throw new RuntimeException("Lỗi khi gọi Geocoding API", e);
     }
-}
 }

@@ -10,6 +10,25 @@ public class CreatePostRequest {
 
      private Long typeId;
 
+     private Double latitude;
+     private Double longitude;
+
+     public Double getLatitude() {
+         return this.latitude;
+     }
+
+     public void setLatitude(Double latitude) {
+         this.latitude = latitude;
+     }
+
+     public Double getLongitude() {
+         return this.longitude;
+     }
+
+     public void setLongitude(Double longitude) {
+         this.longitude = longitude;
+     }
+
     public Long getTypeId() {
         return this.typeId;
     }
@@ -18,9 +37,16 @@ public class CreatePostRequest {
         this.typeId = typeId;
     }
 
-    private String province;
-    private String commune;
-    private String street;
+    private String address;
+
+    public String getAddress() {
+        return this.address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     private String description;
 
     private List<String> imageUrls;
@@ -55,30 +81,6 @@ public class CreatePostRequest {
 
     public void setRoomQuantity(int roomQuantity) {
         this.roomQuantity = roomQuantity;
-    }
-
-    public String getProvince() {
-        return this.province;
-    }
-
-    public void setProvince(String province) {
-        this.province = province;
-    }
-
-    public String getCommune() {
-        return this.commune;
-    }
-
-    public void setCommune(String commune) {
-        this.commune = commune;
-    }
-
-    public String getStreet() {
-        return this.street;
-    }
-
-    public void setStreet(String street) {
-        this.street = street;
     }
 
     public String getDescription() {

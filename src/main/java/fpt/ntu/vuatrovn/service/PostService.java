@@ -21,18 +21,16 @@ import fpt.ntu.vuatrovn.repository.UserRepository;
 @Service
 @Transactional
 public class PostService {
-        private final PostRepository postRepository;
+
+    private final PostRepository postRepository;
     private final UserRepository userRepository;
-    private final GeocodingService geocodingService;
     private final TypeRepository typeRepository;
 
     public PostService(PostRepository postRepository,
                        UserRepository userRepository,
-                       GeocodingService geocodingService,
-                    TypeRepository typeRepository) {
+                       TypeRepository typeRepository) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
-        this.geocodingService = geocodingService;
         this.typeRepository = typeRepository;
     }
 
@@ -44,19 +42,13 @@ public class PostService {
         RoomType type = typeRepository.findById(request.getTypeId())
                 .orElseThrow(() -> new RuntimeException("Type not found"));
 
+        if (request.getPrice() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Giá không được để trống");
+        }
+
         if (request.getPrice() <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Giá phải lớn hơn 0");
         }
-
-        if (request.getPrice() == null) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Giá không được để trống");
-        }
-
-        String fullAddress = request.getStreet() + ", "
-                + request.getCommune() + ", "
-                + request.getProvince() + ", Vietnam";
-
-        double[] coordinates = geocodingService.getCoordinates(fullAddress);
 
         Post post = new Post();
         post.setTitle(request.getTitle());
@@ -64,27 +56,28 @@ public class PostService {
         post.setArea(request.getArea());
         post.setRoom_quantity(request.getRoomQuantity());
 
-        post.setProvince(request.getProvince());
-        post.setCommune(request.getCommune());
-        post.setStreet(request.getStreet());
+        post.setAdrress(request.getAddress());
+
         post.setDecription(request.getDescription());
 
-        post.setLatitude(coordinates[0]);
-        post.setLongitude(coordinates[1]);
+        post.setLatitude(request.getLatitude());
+        post.setLongitude(request.getLongitude());
 
         post.setStatus(PostStatus.NOT_APPROVE);
         post.setUser(user);
         post.setType(type);
 
-        // ===== Lưu Image =====
+        // lưu ảnh
         List<Image> images = new ArrayList<>();
 
         int index = 0;
         for (String url : request.getImageUrls()) {
+
             Image image = new Image();
             image.setUrl(url);
             image.setOrder_index(index++);
             image.setPost(post);
+
             images.add(image);
         }
 
