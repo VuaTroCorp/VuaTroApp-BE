@@ -43,7 +43,7 @@ class PostServiceTest {
 
         CreatePostRequest request = new CreatePostRequest();
         request.setTitle("Phòng trọ");
-        request.setPrice(-45f);
+        request.setPrice(45f);
         request.setArea(20f);
         request.setRoomQuantity(1);
         request.setAddress("Nha Trang");
