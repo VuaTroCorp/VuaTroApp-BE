@@ -1,6 +1,9 @@
 package fpt.ntu.vuatrovn.entity;
 
+import java.util.List;
+
 import fpt.ntu.vuatrovn.enums.PostStatus;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -29,17 +33,32 @@ public class Post {
 
     private Float area;
     private int room_quantity;
-    private String province;
-    private String commune;
+    private String adrress;
 
-    @Column(columnDefinition = "LONGTEXT")
-    private String street;
+    public String getAdrress() {
+        return this.adrress;
+    }
+
+    public void setAdrress(String adrress) {
+        this.adrress = adrress;
+    }
 
     @Column(columnDefinition = "LONGTEXT")
     private String decription;
 
-    private Float longitude;
-    private Float atitude;
+    private Double longitude;
+    private Double latitude;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> images;
+
+    public List<Image> getImages() {
+        return this.images;
+    }
+
+    public void setImages(List<Image> images) {
+        this.images = images;
+    }
 
     @ManyToOne
     @JoinColumn(name = "id",nullable = false)
@@ -98,30 +117,6 @@ public class Post {
         this.room_quantity = room_quantity;
     }
 
-    public String getProvince() {
-        return this.province;
-    }
-
-    public void setProvince(String province) {
-        this.province = province;
-    }
-
-    public String getCommune() {
-        return this.commune;
-    }
-
-    public void setCommune(String commune) {
-        this.commune = commune;
-    }
-
-        public String getStreet() {
-        return this.street;
-    }
-
-    public void setStreet(String street) {
-        this.street = street;
-    }
-
         public String getDecription() {
         return this.decription;
     }
@@ -130,20 +125,20 @@ public class Post {
         this.decription = decription;
     }
 
-    public Float getLongitude() {
+    public Double getLongitude() {
         return this.longitude;
     }
 
-    public void setLongitude(Float longitude) {
+    public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
 
-    public Float getAtitude() {
-        return this.atitude;
+    public Double getLatitude() {
+        return this.latitude;
     }
 
-    public void setAtitude(Float atitude) {
-        this.atitude = atitude;
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
     }
 
         public User getUser() {

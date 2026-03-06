@@ -14,8 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-// 🔥 Xóa @RequiredArgsConstructor vì đã viết constructor tay bên dưới
-public class CustomOAuth2UserService extends DefaultOAuth2UserService { // 🔥 Bổ sung extends
+public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
 
@@ -36,7 +35,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService { // 🔥 
     }
 
     public void processOAuth2User(OAuth2User oAuth2User, String registrationId) {
-        String email = oAuth2User.getAttribute("email"); // 🔥 Khai báo biến email ở đây
+        String email = oAuth2User.getAttribute("email"); 
         String name = oAuth2User.getAttribute("name");
         String providerId = oAuth2User.getAttribute("sub");
 
