@@ -1,10 +1,8 @@
 package fpt.ntu.vuatrovn.config;
 
 import fpt.ntu.vuatrovn.security.JwtAuthenticationFilter;
-import fpt.ntu.vuatrovn.security.OAuth2LoginSuccessHandler;
 import fpt.ntu.vuatrovn.service.CustomOAuth2UserService;
 import fpt.ntu.vuatrovn.service.JwtService;
-import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletResponse; // 🔥 Import quan trọng
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,17 +30,14 @@ public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final JwtService jwtService;
 
     public SecurityConfig(CustomOAuth2UserService customOAuth2UserService,
                       JwtAuthenticationFilter jwtAuthenticationFilter,
-                      JwtService jwtService,
-                    OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) {
+                      JwtService jwtService) {
         this.customOAuth2UserService = customOAuth2UserService;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.jwtService = jwtService;
-        this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
     }
 
     @Bean
