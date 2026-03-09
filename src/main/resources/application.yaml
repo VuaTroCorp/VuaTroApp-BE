@@ -1,3 +1,50 @@
+server:
+  port: 8080
+
 spring:
   application:
-    name: VuaTroVN-BE
+    name: Vuatrovn
+
+  # 1. Cấu hình Database H2 (Theo chuẩn của nhóm: vuatrodb)
+  datasource:
+    url: jdbc:h2:mem:vuatrodb;DB_CLOSE_DELAY=-1
+    driverClassName: org.h2.Driver
+    username: sa
+    password: 
+  
+  # 2. Cấu hình H2 Console
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+      
+  # 3. Cấu hình JPA
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update # Tự động tạo bảng từ code Entity
+    show-sql: true     # Hiện câu SQL để dễ debug
+    defer-datasource-initialization: true
+
+  # 4. Cấu hình Login Google (Của nhóm)
+  # Nếu chưa có Key thật, bạn cứ để nguyên dòng này, app vẫn chạy bình thường.
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 
+            client-secret: 
+            scope:
+              - email
+              - profile
+
+# 5. Cấu hình Swagger UI (Tài liệu API)
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
