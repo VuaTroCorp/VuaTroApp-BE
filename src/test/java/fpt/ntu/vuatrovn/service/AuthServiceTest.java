@@ -51,7 +51,7 @@ class AuthServiceTest {
         // 2. Mock hành vi
         when(userRepository.findByEmail("admin@vuatro.com")).thenReturn(Optional.of(mockUser));
         when(passwordEncoder.matches("123456", "hashed_123456")).thenReturn(true);
-        when(jwtService.generateToken("admin@vuatro.com"))
+        when(jwtService.generateToken("admin@vuatro.com","admin","ADMIN"))
         .thenReturn("test_token_value");
 
         // 3. Chạy test
