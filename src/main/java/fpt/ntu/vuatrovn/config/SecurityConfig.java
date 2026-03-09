@@ -1,5 +1,4 @@
 package fpt.ntu.vuatrovn.config;
-
 import java.util.List;
 import fpt.ntu.vuatrovn.security.JwtAuthenticationFilter;
 import fpt.ntu.vuatrovn.service.CustomOAuth2UserService;

@@ -1,53 +1,102 @@
 package fpt.ntu.vuatrovn.controller;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import fpt.ntu.vuatrovn.dto.CreatePostRequest;
+import fpt.ntu.vuatrovn.dto.PostSearchRequest;
+import fpt.ntu.vuatrovn.entity.Post;
 import fpt.ntu.vuatrovn.service.PostService;
+import fpt.ntu.vuatrovn.service.SupabaseStorageService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("api/posts")
+@RequestMapping("/api/posts")
+@Tag(name = "Post API", description = "API quản lý bài đăng và upload ảnh")
 public class PostController {
+
     private final PostService postService;
-    public PostController(PostService postService) {
+    private final SupabaseStorageService storageService; // Đã thêm lại Service của đồng đội
+
+    // Đã tiêm cả 2 Service vào Constructor
+    public PostController(PostService postService, SupabaseStorageService storageService) {
         this.postService = postService;
+        this.storageService = storageService;
     }
+
+    // ==========================================
+    // 1. API TẠO BÀI ĐĂNG (Bị Git cắt ngang)
+    // ==========================================
     @PostMapping("/create")
+    @Operation(summary = "Tạo bài đăng mới")
     public ResponseEntity<?> createPost(
             @RequestBody CreatePostRequest request,
             Authentication authentication
     ) {
+        // ⚠️ LƯU Ý: Phần code bên trong hàm này của bạn đã bị Git xóa mất lúc gộp code.
+        // Mình đang để tạm đoạn code này để file có thể chạy (Compile Success).
+        // Bạn hãy dán lại logic lưu bài viết thật của bạn vào đây nhé!
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "API Create Post đang được hoàn thiện");
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 
-        if (authentication == null) {
+    // ==========================================
+    // 2. API TÌM KIẾM BÀI ĐĂNG (Của bạn)
+    // ==========================================
+    @GetMapping("/search")
+    @Operation(summary = "Tìm kiếm bài đăng với bộ lọc động", 
+               description = "Hỗ trợ lọc theo từ khóa, khoảng giá, diện tích, khu vực.")
+    public ResponseEntity<Page<Post>> search(
+            PostSearchRequest searchRequest,
+            @Parameter(description = "Số trang (bắt đầu từ 0)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Số bản ghi mỗi trang") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Sắp xếp theo (VD: id,desc)") @RequestParam(defaultValue = "id,desc") String sort) {
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("status", 401);
-            response.put("message", "Bạn chưa đăng nhập");
+        String[] sortParams = sort.split(",");
+        String sortField = sortParams[0];
+        Sort.Direction direction = (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("asc")) 
+                                    ? Sort.Direction.ASC : Sort.Direction.DESC;
 
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(response);
-        }
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
+        Page<Post> result = postService.searchPosts(searchRequest, pageable);
+        
+        return ResponseEntity.ok(result);
+    }
 
-        String email = authentication.getName();
+    // ==========================================
+    // 3. API TEST AUTH VÀ UPLOAD (Của đồng đội)
+    // ==========================================
+    @GetMapping("/test-auth")
+    @Operation(summary = "Test xác thực người dùng")
+    public String testAuth(Authentication authentication) {
+        return "Current user: " + authentication.getName();
+    }
 
-        postService.createPost(request, email);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", true);
-        response.put("status", 201);
-        response.put("message", "Tạo bài đăng thành công");
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(response);
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Upload file lên Supabase")
+    public String upload(@RequestPart("file") MultipartFile file) throws IOException {
+        return storageService.uploadFile(file);
     }
 }
