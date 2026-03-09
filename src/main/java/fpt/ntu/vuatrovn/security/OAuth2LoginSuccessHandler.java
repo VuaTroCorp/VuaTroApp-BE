@@ -30,8 +30,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         OAuth2User user = (OAuth2User) authentication.getPrincipal();
 
         String email = user.getAttribute("email");
+        String username = user.getAttribute("username");
+        String role = user.getAttribute("role");
 
-        String token = jwtService.generateToken(email);
+        String token = jwtService.generateToken(email, username, role);
 
         response.setContentType("application/json");
         response.getWriter().write("{\"token\":\"" + token + "\"}");

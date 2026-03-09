@@ -84,19 +84,4 @@ public class PostController {
         
         return ResponseEntity.ok(result);
     }
-
-    // ==========================================
-    // 3. API TEST AUTH VÀ UPLOAD (Của đồng đội)
-    // ==========================================
-    @GetMapping("/test-auth")
-    @Operation(summary = "Test xác thực người dùng")
-    public String testAuth(Authentication authentication) {
-        return "Current user: " + authentication.getName();
-    }
-
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Upload file lên Supabase")
-    public String upload(@RequestPart("file") MultipartFile file) throws IOException {
-        return storageService.uploadFile(file);
-    }
 }
