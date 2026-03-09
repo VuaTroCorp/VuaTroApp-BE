@@ -23,7 +23,7 @@ public class PostSpecification {
                 if (request.getKeyword() != null && !request.getKeyword().trim().isEmpty()) {
                     String pattern = "%" + request.getKeyword().toLowerCase() + "%";
                     Predicate titleMatch = cb.like(cb.lower(root.get("title")), pattern);
-                    Predicate descMatch = cb.like(cb.lower(root.get("decription")), pattern); // Viết đúng theo tên biến của team
+                    Predicate descMatch = cb.like(cb.lower(root.get("decription")), pattern);
                     predicates.add(cb.or(titleMatch, descMatch));
                 }
 

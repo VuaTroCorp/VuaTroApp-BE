@@ -1,6 +1,8 @@
 package fpt.ntu.vuatrovn.config;
 
 import java.util.List;
+
+import fpt.ntu.vuatrovn.entity.User;
 import fpt.ntu.vuatrovn.security.JwtAuthenticationFilter;
 import fpt.ntu.vuatrovn.service.CustomOAuth2UserService;
 import fpt.ntu.vuatrovn.service.JwtService;
@@ -21,9 +23,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import fpt.ntu.vuatrovn.service.CustomOAuth2UserService;
-import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -80,16 +79,13 @@ public class SecurityConfig {
                 String registrationId = ((OAuth2AuthenticationToken) authentication)
                         .getAuthorizedClientRegistrationId();
 
-                // lưu user vào DB
-                customOAuth2UserService.processOAuth2User(oAuth2User, registrationId);
+                    User user = customOAuth2UserService.processOAuth2User(oAuth2User, registrationId);
 
-                // lấy email
-                String email = oAuth2User.getAttribute("email");
-
-                // tạo JWT
-                String token = jwtService.generateToken(email);
-
-                System.out.println("JWT TOKEN: " + token);
+                    String token = jwtService.generateToken(
+                            user.getEmail(),
+                            user.getUsername(),
+                            user.getRole().name()
+                    );
 
                 response.setContentType("application/json");
                 response.getWriter().write("{\"token\":\"" + token + "\"}");
