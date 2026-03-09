@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,35 +37,32 @@ class AuthServiceTest {
     @InjectMocks
     private AuthService authService;
 
-    @Test
-    void login_Success() {
-        // 1. Chuẩn bị dữ liệu giả
-        User mockUser = new User();
-        mockUser.setEmail("admin@vuatro.com");
-        mockUser.setPassword("hashed_123456"); 
-        
-        // SỬA: Đã dùng đúng Enum chuẩn
-        mockUser.setRole(Role.ADMIN);
-        mockUser.setStatus(UserStatus.ACTIVE); 
-        mockUser.setProvider(Provider.LOCAL); 
+@Test
+void login_Success() {
 
-        // 2. Mock hành vi
-        when(userRepository.findByEmail("admin@vuatro.com")).thenReturn(Optional.of(mockUser));
-        when(passwordEncoder.matches("123456", "hashed_123456")).thenReturn(true);
-        when(jwtService.generateToken("admin@vuatro.com","admin","ADMIN"))
-        .thenReturn("test_token_value");
+    User mockUser = new User();
+    mockUser.setEmail("admin@vuatro.com");
+    mockUser.setPassword("hashed_123456");
+    mockUser.setRole(Role.ADMIN);
+    mockUser.setStatus(UserStatus.ACTIVE);
+    mockUser.setProvider(Provider.LOCAL);
 
-        // 3. Chạy test
-        LoginRequest request = new LoginRequest("admin@vuatro.com", "123456");
-        
-        // LƯU Ý: Chỗ này có thể vẫn báo đỏ nếu nhóm bạn đã đổi tên hàm login
-        LoginResponse response = authService.login(request);
+    when(userRepository.findByEmail("admin@vuatro.com"))
+            .thenReturn(Optional.of(mockUser));
 
-        // 4. Kiểm tra
-        assertNotNull(response.getToken());
-        assertEquals("ADMIN", response.getRole());
-    }
+    when(passwordEncoder.matches("123456", "hashed_123456"))
+            .thenReturn(true);
 
+    when(jwtService.generateToken(anyString(), anyString(), anyString()))
+            .thenReturn("test_token_value");
+
+    LoginRequest request = new LoginRequest("admin@vuatro.com", "123456");
+
+    LoginResponse response = authService.login(request);
+
+    assertNotNull(response.getToken());
+    assertEquals("ADMIN", response.getRole());
+}
     @Test
     void login_Fail_WrongPassword() {
         User mockUser = new User();
