@@ -13,14 +13,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import fpt.ntu.vuatrovn.dto.CreatePostRequest;
 import fpt.ntu.vuatrovn.dto.PostSearchRequest;
+import fpt.ntu.vuatrovn.dto.UpdatePostRequest;
 import fpt.ntu.vuatrovn.entity.Post;
 import fpt.ntu.vuatrovn.service.PostService;
 
@@ -41,7 +42,7 @@ public class PostController {
     }
 
     // ==========================================
-    // 1. API TẠO BÀI ĐĂNG (Bị Git cắt ngang)
+    // 1. API TẠO BÀI ĐĂNG
     // ==========================================
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createPost(
@@ -93,5 +94,51 @@ public class PostController {
         Page<Post> result = postService.searchPosts(searchRequest, pageable);
         
         return ResponseEntity.ok(result);
+    }
+
+    // ==========================================
+    // 3. GET POST DETAIL
+    // ==========================================  
+    @GetMapping("/{postId}")
+    public ResponseEntity<Post> getPostDetail(@PathVariable Long postId) {
+
+        Post post = postService.getPostDetail(postId);
+
+        return ResponseEntity.ok(post);
+    }
+
+
+    // ==========================================
+    // 4. EDIT POST API
+    // ==========================================   
+    @PostMapping(value = "/edit/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updatePost(
+            @Parameter(description = "ID bài đăng") 
+            @PathVariable Long postId,
+            @ModelAttribute UpdatePostRequest request,
+            Authentication authentication
+    ) {
+
+        if (authentication == null) {
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("status", 401);
+            response.put("message", "Bạn chưa đăng nhập");
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(response);
+        }
+
+        String email = authentication.getName();
+
+        postService.updatePost(postId, request, email);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("status", 200);
+        response.put("message", "Cập nhật bài đăng thành công");
+
+        return ResponseEntity.ok(response);
     }
 }
