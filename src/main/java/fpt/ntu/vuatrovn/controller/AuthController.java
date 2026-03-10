@@ -63,7 +63,7 @@ public class AuthController {
     @PostMapping("/forgot-password")
     public ResponseEntity<?> requestPasswordReset(@RequestBody ForgotPasswordRequest request){
 //        Check email và tạo otp
-        String content = this.authService.generatePasswordOtpCode(request);
+        String content = this.authService.generateAndSendPasswordResetOtp(request);
         return ResponseEntity.ok(content);
     }
 

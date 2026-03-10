@@ -142,7 +142,7 @@ public class AuthService {
     }
 
     // 4.Check Email và tạo Otp ( FORGOT PASSWORD)
-    public String generatePasswordOtpCode(ForgotPasswordRequest request){
+    public String generateAndSendPasswordResetOtp(ForgotPasswordRequest request){
 
         User user = this.userRepository.findByEmail(request.getEmail()).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST,"Email không tồn tại")
@@ -154,36 +154,22 @@ public class AuthService {
         //Ramdom reset token chữ số
         String resetToken = UUID.randomUUID().toString();
 
-
-        if (optionalReset.isEmpty()){
-           // Có thì tạo reset token
-
-            PasswordReset passwordReset = new PasswordReset();
-            passwordReset.setResetToken(resetToken);
-            passwordReset.setToken_expiry(
-                    Instant.now().plus(5,ChronoUnit.MINUTES)
-            );
-            passwordReset.setUser(user);
-
-            this.passwordResetRepository.save(passwordReset);
-            //Gửi mail
-            this.emailService.sendOtpEmail(user.getEmail(),resetToken);
-            return "Vui lòng kiểm tra mail";
-        } else if (Instant.now().isAfter(optionalReset.get().getToken_expiry())){
-            this.passwordResetRepository.delete(optionalReset.get());
-//            Tạo bản ghi mới
-            PasswordReset passwordReset = new PasswordReset();
-            passwordReset.setResetToken(resetToken);
-            passwordReset.setToken_expiry(
-                    Instant.now().plus(5, ChronoUnit.MINUTES)
-            );
-            passwordReset.setUser(user);
-            this.passwordResetRepository.save(passwordReset);
-            //Gửi lại otp
-            this.emailService.sendOtpEmail(user.getEmail(),resetToken);
-            return "Vui lòng kiểm tra mail";
+        if (optionalReset.isPresent()){
+            PasswordReset reset = optionalReset.get();
+            /*Check otp chua het han*/
+            if (Instant.now().isBefore(reset.getToken_expiry())){
+                return "OTP đã được gửi. Vui lòng kiểm tra email hoặc thử lại sau.";
+            }
+            passwordResetRepository.delete(reset);
         }
-
+        PasswordReset passwordReset = new PasswordReset();
+        passwordReset.setResetToken(resetToken);
+        passwordReset.setToken_expiry(
+                Instant.now().plus(1,ChronoUnit.MINUTES)
+        );
+        passwordReset.setUser(user);
+        passwordResetRepository.save(passwordReset);
+        emailService.sendOtpEmail(user.getEmail(),resetToken);
         return "Vui lòng kiểm tra mail";
     }
 
