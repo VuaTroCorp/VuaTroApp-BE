@@ -13,8 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -37,26 +37,24 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class PostController {
 
     private final PostService postService;
-    private final SupabaseStorageService storageService; // Đã thêm lại Service của đồng đội
+    private final SupabaseStorageService storageService; // 🔥 Đã bổ sung biến này
 
-    // Đã tiêm cả 2 Service vào Constructor
+    // 🔥 Đã tiêm ĐÚNG cả 2 Service vào Constructor
     public PostController(PostService postService, SupabaseStorageService storageService) {
         this.postService = postService;
         this.storageService = storageService;
     }
 
     // ==========================================
-    // 1. API TẠO BÀI ĐĂNG (Bị Git cắt ngang)
+    // 1. API TẠO BÀI ĐĂNG
     // ==========================================
-    @PostMapping("/create")
-    @Operation(summary = "Tạo bài đăng mới")
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createPost(
-            @RequestBody CreatePostRequest request,
+            @ModelAttribute CreatePostRequest request,
             Authentication authentication
     ) {
         // ⚠️ LƯU Ý: Phần code bên trong hàm này của bạn đã bị Git xóa mất lúc gộp code.
-        // Mình đang để tạm đoạn code này để file có thể chạy (Compile Success).
-        // Bạn hãy dán lại logic lưu bài viết thật của bạn vào đây nhé!
+        // Tạm thời trả về Mock Data để Build Success.
         Map<String, String> response = new HashMap<>();
         response.put("message", "API Create Post đang được hoàn thiện");
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -86,7 +84,7 @@ public class PostController {
     }
 
     // ==========================================
-    // 3. API TEST AUTH VÀ UPLOAD (Của đồng đội)
+    // 3. API TEST UPLOAD (Của đồng đội - khôi phục lại)
     // ==========================================
     @GetMapping("/test-auth")
     @Operation(summary = "Test xác thực người dùng")

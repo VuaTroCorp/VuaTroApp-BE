@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import fpt.ntu.vuatrovn.dto.CreatePostRequest;
@@ -30,13 +31,16 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final TypeRepository typeRepository;
+    private final SupabaseStorageService supabaseStorageService;
 
     public PostService(PostRepository postRepository,
                        UserRepository userRepository,
-                       TypeRepository typeRepository) {
+                       TypeRepository typeRepository,
+                    SupabaseStorageService supabaseStorageService) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.typeRepository = typeRepository;
+        this.supabaseStorageService = supabaseStorageService;
     }
 
     // ==========================================
@@ -79,13 +83,21 @@ public class PostService {
         List<Image> images = new ArrayList<>();
 
         int index = 0;
-        for (String url : request.getImageUrls()) {
+    for (MultipartFile file : request.getImages()) {
+
+        try {
+            String imageUrl = supabaseStorageService.uploadFile(file);
+
             Image image = new Image();
-            image.setUrl(url);
+            image.setUrl(imageUrl);
             image.setOrder_index(index++);
             image.setPost(post);
             images.add(image);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Upload ảnh thất bại");
         }
+    }
 
         post.setImages(images);
         postRepository.save(post);

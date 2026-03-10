@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import org.mockito.InjectMocks;
@@ -42,6 +43,9 @@ class PostServiceTest {
     @Mock
     private TypeRepository typeRepository;
 
+    @Mock
+    private SupabaseStorageService supabaseStorageService;
+
     @InjectMocks
     private PostService postService;
 
@@ -65,31 +69,39 @@ class PostServiceTest {
     // ==========================================
     // 2. TEST TÍNH NĂNG TẠO BÀI ĐĂNG (Của đồng đội)
     // ==========================================
-    @Test
-    void createPost_success() {
-        // Đã bổ sung dòng khởi tạo biến request bị thiếu
-        CreatePostRequest request = new CreatePostRequest(); 
-        request.setTitle("Phòng trọ");
-        request.setPrice(45f);
-        request.setArea(20f);
-        request.setRoomQuantity(1);
-        request.setAddress("Nha Trang");
-        request.setDescription("Phòng sạch");
-        request.setLatitude(12.238);
-        request.setLongitude(109.196);
-        request.setTypeId(1L);
-        request.setImageUrls(List.of("img1.jpg", "img2.jpg"));
+@Test
+void createPost_success() throws Exception {
 
-        User user = new User();
-        RoomType type = new RoomType();
+    CreatePostRequest request = new CreatePostRequest();
+    request.setTitle("Phòng trọ");
+    request.setPrice(45f);
+    request.setArea(20f);
+    request.setRoomQuantity(1);
+    request.setAddress("Nha Trang");
+    request.setDescription("Phòng sạch");
+    request.setLatitude(12.238);
+    request.setLongitude(109.196);
+    request.setTypeId(1L);
 
-        when(userRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(user));
-        when(typeRepository.findById(1L)).thenReturn(Optional.of(type));
+    MockMultipartFile file =
+            new MockMultipartFile("images", "test.jpg",
+                    "image/jpeg", "test".getBytes());
 
-        postService.createPost(request, "test@gmail.com");
+    request.setImages(List.of(file));
 
-        verify(postRepository, times(1)).save(any(Post.class));
-    }
+    User user = new User();
+    RoomType type = new RoomType();
+
+    when(userRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(user));
+    when(typeRepository.findById(1L)).thenReturn(Optional.of(type));
+
+    when(supabaseStorageService.uploadFile(any()))
+            .thenReturn("https://img.supabase/test.jpg");
+
+    postService.createPost(request, "test@gmail.com");
+
+    verify(postRepository, times(1)).save(any(Post.class));
+}
 
     @Test
     void createPost_fail_whenPriceNull() {
