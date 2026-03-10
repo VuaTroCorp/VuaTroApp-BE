@@ -24,4 +24,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // Tìm user từ Google OAuth2 (Đã chuẩn hóa dùng Enum Provider)
     Optional<User> findByProviderAndProviderId(Provider provider, String providerId);
+
+    Optional<User> findByPhone(String phone);
+
+    boolean existsByPhone(String phone);
 }

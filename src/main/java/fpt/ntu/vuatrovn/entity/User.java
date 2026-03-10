@@ -7,6 +7,8 @@ import fpt.ntu.vuatrovn.enums.UserStatus;
 import jakarta.persistence.*; // Dành cho @Entity, @Id, @Column...
 import lombok.*;            // Dành cho @Data, @Builder...
 
+import java.util.List;
+
 @Entity
 @Table(name = "users")
 @Data 
@@ -42,4 +44,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToMany(mappedBy = "user")
+    private List<OtpVerifications> otpVerifications;
 }
