@@ -24,7 +24,6 @@ import java.util.UUID;
 
 @Service
 public class AuthService {
-    // 🔥 ĐÃ BỔ SUNG DÒNG NÀY - Đây là "chìa khóa" để hết lỗi
     private final UserRepository userRepository; 
     
     private final VerificationTokenRepository tokenRepository;
@@ -82,7 +81,7 @@ public class AuthService {
         vt.setExpiryDate(LocalDateTime.now().plusMinutes(15));
         tokenRepository.save(vt);
 
-        // Gửi mail (Nhớ kiểm tra mail trap hoặc cấu hình SMTP nhé)
+        // Gửi mail
         emailService.sendVerificationEmail(savedUser.getEmail(), token);
         return savedUser;
     }
@@ -112,8 +111,11 @@ public class AuthService {
             );
         }
 
-        String token = jwtService.generateToken(user.getEmail());
-
+        String token = jwtService.generateToken(
+                user.getEmail(),
+                user.getUsername(),
+                user.getRole().name()
+        );
         return new LoginResponse(
                 200,
                 token,
