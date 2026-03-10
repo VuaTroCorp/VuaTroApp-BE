@@ -8,6 +8,9 @@ import fpt.ntu.vuatrovn.repository.OtpVerificationRepository;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import lombok.*;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -31,12 +34,16 @@ public class UserService {
 
     public String generatePhoneOtp(UserRequest request){
 
+        /*Lấy thông tin đăng nhập của hệ thống*/
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
         String phoneOtp = String.format(
                 "%06d",new SecureRandom().nextInt(1_000_000)
         );
 
-        User user = this.userRepository.findByPhone(request.getPhone()).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST,"Khong tim thay so dien thoai")
+        User user = this.userRepository.findByEmail(email).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST,"khong tim thay user")
         );
 
         /*Check phone nhập xem trùng ko*/
@@ -62,8 +69,9 @@ public class UserService {
                 );
                 otpVerifications.setType(OtpType.PHONE);
                 otpVerifications.setTargetValue(request.getNewPhone());
+                otpVerifications.setNewName(request.getNewUserName());
                 otpVerificationRepository.save(otpVerifications);
-                return "Otp code: " + phoneOtp;
+                return "OTP đã được gửi tới số điện thoại " + request.getNewPhone() + "Vui long kiem tra SMS";
             }
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -76,6 +84,7 @@ public class UserService {
         newOtp.setUser(user);
         newOtp.setType(OtpType.PHONE);
         newOtp.setTargetValue(request.getNewPhone());
+        newOtp.setNewName(request.getNewUserName());
         newOtp.setExpired_at(Instant.now().plus(1, ChronoUnit.MINUTES));
 
         otpVerificationRepository.save(newOtp);
@@ -86,15 +95,19 @@ public class UserService {
 //                request.getNewPhone(),phoneOtp
 //        );
 
-        return "Otp code:" + phoneOtp ;
+        return "OTP đã được gửi tới số điện thoại " + request.getNewPhone() + "Vui long kiem tra SMS" ;
     }
 
     public String generateEmailOtp(UserRequest request) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String emailUserName = authentication.getName();
+
         String emailOtp = String.format(
                 "%06d",new SecureRandom().nextInt(1_000_000)
         );
 
-        User user = this.userRepository.findByEmail(request.getEmail()).orElseThrow(
+        User user = this.userRepository.findByEmail(emailUserName).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "khong tim thay user")
         );
 
@@ -123,13 +136,15 @@ public class UserService {
                 otpVerifications.setOtp(emailOtp);
                 otpVerifications.setUser(user);
                 otpVerifications.setType(OtpType.EMAIL);
+                otpVerifications.setNewName(request.getNewUserName());
                 otpVerifications.setExpired_at(Instant.now().plus(1,ChronoUnit.MINUTES));
                 otpVerifications.setTargetValue(request.getNewEmail());
                 otpVerificationRepository.save(otpVerifications);
 
                 emailService.sendOtpEmail(request.getNewEmail(),emailOtp);
 
-                return emailOtp;
+                return  "OTP đã được gửi tới email " + request.getNewEmail() +
+                        ". Vui lòng kiểm tra email";
             }
 
             throw new ResponseStatusException(
@@ -143,6 +158,7 @@ public class UserService {
         otpVerifications.setOtp(emailOtp);
         otpVerifications.setType(OtpType.EMAIL);
         otpVerifications.setTargetValue(request.getNewEmail());
+        otpVerifications.setNewName(request.getNewUserName());
         otpVerifications.setUser(user);
         otpVerifications.setExpired_at(
                 Instant.now().plus(1,ChronoUnit.MINUTES)
@@ -151,7 +167,8 @@ public class UserService {
 
 //        gửi mail
         emailService.sendOtpEmail(request.getNewEmail(),emailOtp);
-        return emailOtp;
+        return  "OTP đã được gửi tới email " + request.getNewEmail() +
+                ". Vui lòng kiểm tra email.";
     }
 
 //    Check Otp Email;
@@ -167,10 +184,16 @@ public class UserService {
             otpVerificationRepository.delete(otpVerifications);
             throw  new ResponseStatusException(HttpStatus.BAD_REQUEST,"Otp het hạn vui lòng thực hiện lại");
         }
+        /*Con han thi check xem truong new name co data ko*/
 
         User user = otpVerifications.getUser();
 
+        if (otpVerifications.getNewName() == null || otpVerifications.getNewName().isBlank()){
+            otpVerifications.setNewName(user.getUsername());
+        }
+
         user.setEmail(targetEmail);
+        user.setUsername(otpVerifications.getNewName());
         this.userRepository.save(user);
         this.otpVerificationRepository.delete(otpVerifications);
 

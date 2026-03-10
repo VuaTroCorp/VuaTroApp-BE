@@ -26,6 +26,8 @@ public class OtpVerifications {
 
     private String targetValue;
 
+    private String newName;
+
     private Instant expired_at;
 
     @ManyToOne(fetch = FetchType.LAZY)
