@@ -92,7 +92,6 @@ public class PostService {
             image.setUrl(imageUrl);
             image.setOrder_index(index++);
             image.setPost(post);
-
             images.add(image);
 
         } catch (Exception e) {
