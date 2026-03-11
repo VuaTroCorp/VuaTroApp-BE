@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,7 +37,6 @@ public class PostController {
 
     private final PostService postService;
 
-    // Đã tiêm cả 2 Service vào Constructor
     public PostController(PostService postService) {
         this.postService = postService;
     }
@@ -99,10 +99,10 @@ public class PostController {
     // ==========================================
     // 3. GET POST DETAIL
     // ==========================================  
-    @GetMapping("/{postId}")
-    public ResponseEntity<Post> getPostDetail(@PathVariable Long postId) {
+    @GetMapping("/{id}")
+    public ResponseEntity<Post> getPostDetail(@PathVariable Long id) {
 
-        Post post = postService.getPostDetail(postId);
+        Post post = postService.getPostDetail(id);
 
         return ResponseEntity.ok(post);
     }
@@ -111,10 +111,10 @@ public class PostController {
     // ==========================================
     // 4. EDIT POST API
     // ==========================================   
-    @PostMapping(value = "/edit/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updatePost(
             @Parameter(description = "ID bài đăng") 
-            @PathVariable Long postId,
+            @PathVariable Long id,
             @ModelAttribute UpdatePostRequest request,
             Authentication authentication
     ) {
@@ -132,13 +132,28 @@ public class PostController {
 
         String email = authentication.getName();
 
-        postService.updatePost(postId, request, email);
+        postService.updatePost(id, request, email);
 
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("status", 200);
         response.put("message", "Cập nhật bài đăng thành công");
 
+        return ResponseEntity.ok(response);
+    }
+
+    // ==========================================
+    // 5. DELETE POST API
+    // ========================================== 
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deletePost(@PathVariable Long id, Authentication authentication){
+        String email = authentication.getName();
+        postService.deletePost(id, email);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("status", 200);
+        response.put("message", "Cập nhật bài đăng thành công");
         return ResponseEntity.ok(response);
     }
 }
