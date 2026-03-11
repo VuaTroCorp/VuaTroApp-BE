@@ -14,8 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-// 🔥 Xóa @RequiredArgsConstructor vì đã viết constructor tay bên dưới
-public class CustomOAuth2UserService extends DefaultOAuth2UserService { // 🔥 Bổ sung extends
+public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
 
@@ -35,8 +34,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService { // 🔥 
         return oAuth2User;
     }
 
-    public void processOAuth2User(OAuth2User oAuth2User, String registrationId) {
-        String email = oAuth2User.getAttribute("email"); // 🔥 Khai báo biến email ở đây
+    public User processOAuth2User(OAuth2User oAuth2User, String registrationId) {
+        String email = oAuth2User.getAttribute("email"); 
         String name = oAuth2User.getAttribute("name");
         String providerId = oAuth2User.getAttribute("sub");
 
@@ -47,7 +46,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService { // 🔥 
         Optional<User> existingUser = userRepository.findByProviderAndProviderId(provider, providerId);
 
         if (existingUser.isPresent()) {
-            return; // Đã có tài khoản thì không tạo mới nữa
+            return existingUser.get(); // Đã có tài khoản thì không tạo mới nữa
         }
 
         // Tạo mới tài khoản nếu chưa tồn tại
@@ -61,5 +60,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService { // 🔥 
 
         userRepository.save(user);
         System.out.println("✅ ĐÃ LƯU USER GOOGLE MỚI: " + email);
+        return user;
     }
 }

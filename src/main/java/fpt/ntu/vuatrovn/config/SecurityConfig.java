@@ -1,7 +1,10 @@
 package fpt.ntu.vuatrovn.config;
 import java.util.List;
+
+import fpt.ntu.vuatrovn.entity.User;
 import fpt.ntu.vuatrovn.security.JwtAuthenticationFilter;
 import fpt.ntu.vuatrovn.service.CustomOAuth2UserService;
+import fpt.ntu.vuatrovn.service.JwtService;
 import jakarta.servlet.http.HttpServletResponse; // 🔥 Import quan trọng
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,20 +23,20 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import fpt.ntu.vuatrovn.service.CustomOAuth2UserService;
-import jakarta.servlet.http.HttpServletResponse;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtService jwtService;
 
     public SecurityConfig(CustomOAuth2UserService customOAuth2UserService,
-                      JwtAuthenticationFilter jwtAuthenticationFilter) {
+                      JwtAuthenticationFilter jwtAuthenticationFilter,
+                      JwtService jwtService) {
         this.customOAuth2UserService = customOAuth2UserService;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.jwtService = jwtService;
     }
 
     @Bean
@@ -66,20 +69,26 @@ public class SecurityConfig {
             .addFilterBefore(jwtAuthenticationFilter,
                 UsernamePasswordAuthenticationFilter.class)
                 
-            .oauth2Login(oauth2 -> oauth2
-                .userInfoEndpoint(withDefaults())
-                .successHandler((request, response, authentication) -> {
-                    OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-                    String registrationId = ((OAuth2AuthenticationToken) authentication)
-                            .getAuthorizedClientRegistrationId();
+        .oauth2Login(oauth2 -> oauth2
+            .userInfoEndpoint(withDefaults())
+            .successHandler((request, response, authentication) -> {
 
-                    customOAuth2UserService.processOAuth2User(oAuth2User, registrationId);
-                    response.sendRedirect("/");
-                })
-                .failureHandler((request, response, exception) -> {
-                    System.err.println("❌ LỖI ĐĂNG NHẬP GOOGLE: " + exception.getMessage());
-                    response.sendRedirect("/login?error");
-                })
+                OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+
+                String registrationId = ((OAuth2AuthenticationToken) authentication)
+                        .getAuthorizedClientRegistrationId();
+
+                    User user = customOAuth2UserService.processOAuth2User(oAuth2User, registrationId);
+
+                    String token = jwtService.generateToken(
+                            user.getEmail(),
+                            user.getUsername(),
+                            user.getRole().name()
+                    );
+
+                response.setContentType("application/json");
+                response.getWriter().write("{\"token\":\"" + token + "\"}");
+            })
             )
             .headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
