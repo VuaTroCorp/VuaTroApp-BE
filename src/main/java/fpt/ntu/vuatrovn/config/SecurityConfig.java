@@ -57,7 +57,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
                         "/", "/home", "/login/**", "/oauth2/**",
-                        "/api/auth/**","/api/user/**","/api/user/**","/swagger-ui/**", "/v3/api-docs/**",
+                        "/api/auth/**","/api/user/**","/swagger-ui/**", "/v3/api-docs/**",
                         "/swagger-ui.html", "/h2-console/**","/api/test/**", "/api/posts/**"
                 ).permitAll()
                 .anyRequest().authenticated()
