@@ -43,7 +43,6 @@ public class PostController {
 
     public PostController(PostService postService) {
         this.postService = postService;
-        this.storageService = storageService;
     }
 
     // ==========================================
