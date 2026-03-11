@@ -1,5 +1,4 @@
 package fpt.ntu.vuatrovn.config;
-
 import java.util.List;
 
 import fpt.ntu.vuatrovn.entity.User;
