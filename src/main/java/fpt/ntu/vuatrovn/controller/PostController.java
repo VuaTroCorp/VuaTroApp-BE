@@ -12,8 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import fpt.ntu.vuatrovn.dto.CreatePostRequest;
 import fpt.ntu.vuatrovn.dto.PostSearchRequest;
+import fpt.ntu.vuatrovn.dto.UpdatePostRequest;
 import fpt.ntu.vuatrovn.entity.Post;
 import fpt.ntu.vuatrovn.service.PostService;
 import fpt.ntu.vuatrovn.service.SupabaseStorageService;
@@ -37,12 +40,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class PostController {
 
     private final PostService postService;
-    private final SupabaseStorageService storageService; // 🔥 Đã bổ sung biến này
 
-    // 🔥 Đã tiêm ĐÚNG cả 2 Service vào Constructor
-    public PostController(PostService postService, SupabaseStorageService storageService) {
+    public PostController(PostService postService) {
         this.postService = postService;
-        this.storageService = storageService;
     }
 
     // ==========================================
@@ -84,17 +84,63 @@ public class PostController {
     }
 
     // ==========================================
-    // 3. API TEST UPLOAD (Của đồng đội - khôi phục lại)
-    // ==========================================
-    @GetMapping("/test-auth")
-    @Operation(summary = "Test xác thực người dùng")
-    public String testAuth(Authentication authentication) {
-        return "Current user: " + authentication.getName();
+    // 3. GET POST DETAIL
+    // ==========================================  
+    @GetMapping("/{id}")
+    public ResponseEntity<Post> getPostDetail(@PathVariable Long id) {
+
+        Post post = postService.getPostDetail(id);
+
+        return ResponseEntity.ok(post);
     }
 
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Upload file lên Supabase")
-    public String upload(@RequestPart("file") MultipartFile file) throws IOException {
-        return storageService.uploadFile(file);
+
+    // ==========================================
+    // 4. EDIT POST API
+    // ==========================================   
+    @PostMapping(value = "/edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updatePost(
+            @Parameter(description = "ID bài đăng") 
+            @PathVariable Long id,
+            @ModelAttribute UpdatePostRequest request,
+            Authentication authentication
+    ) {
+
+        if (authentication == null) {
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("status", 401);
+            response.put("message", "Bạn chưa đăng nhập");
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(response);
+        }
+
+        String email = authentication.getName();
+
+        postService.updatePost(id, request, email);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("status", 200);
+        response.put("message", "Cập nhật bài đăng thành công");
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ==========================================
+    // 5. DELETE POST API
+    // ========================================== 
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deletePost(@PathVariable Long id, Authentication authentication){
+        String email = authentication.getName();
+        postService.deletePost(id, email);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("status", 200);
+        response.put("message", "Cập nhật bài đăng thành công");
+        return ResponseEntity.ok(response);
     }
 }
