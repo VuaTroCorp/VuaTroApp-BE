@@ -28,7 +28,6 @@ import fpt.ntu.vuatrovn.dto.PostSearchRequest;
 import fpt.ntu.vuatrovn.dto.UpdatePostRequest;
 import fpt.ntu.vuatrovn.entity.Post;
 import fpt.ntu.vuatrovn.service.PostService;
-import fpt.ntu.vuatrovn.service.RentalRegistrationService;
 import fpt.ntu.vuatrovn.service.SupabaseStorageService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,12 +40,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class PostController {
 
     private final PostService postService;
-    private final RentalRegistrationService rentalRegistrationService;
 
-    public PostController(PostService postService,
-                          RentalRegistrationService rentalRegistrationService) {
+    public PostController(PostService postService) {
         this.postService = postService;
-        this.rentalRegistrationService = rentalRegistrationService;
     }
 
     // ==========================================
@@ -165,31 +161,4 @@ public class PostController {
         response.put("message", "Cập nhật bài đăng thành công");
         return ResponseEntity.ok(response);
     }
-    @PostMapping("/{postId}/register-view")
-public ResponseEntity<?> registerViewRoom(
-        @PathVariable Long postId,
-        Authentication authentication
-) {
-
-    if(authentication == null){
-
-        Map<String,Object> response = new HashMap<>();
-        response.put("status",401);
-        response.put("message","Bạn chưa đăng nhập");
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(response);
-    }
-
-    String email = authentication.getName();
-
-    rentalRegistrationService.registerViewRoom(postId,email);
-
-    Map<String,Object> response = new HashMap<>();
-    response.put("status",200);
-    response.put("message",
-            "Your request has been sent. Please wait for landlord confirmation.");
-
-    return ResponseEntity.ok(response);
-}
 }
