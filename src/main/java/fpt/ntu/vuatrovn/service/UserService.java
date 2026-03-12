@@ -1,6 +1,7 @@
 package fpt.ntu.vuatrovn.service;
 
 import fpt.ntu.vuatrovn.dto.UserRequest;
+import fpt.ntu.vuatrovn.dto.UserResponse;
 import fpt.ntu.vuatrovn.entity.OtpVerifications;
 import fpt.ntu.vuatrovn.entity.User;
 import fpt.ntu.vuatrovn.enums.OtpType;
@@ -31,6 +32,27 @@ public class UserService {
     private final SmsService smsService;
 
     private final EmailService emailService;
+
+    public UserResponse ConvertUserToDTo(User user){
+        return UserResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .role(user.getRole())
+                .provider(user.getProvider())
+                .status(user.getStatus())
+                .build();
+    }
+
+    public UserResponse getUserInfo(String email){
+        User user = this.userRepository.findByEmail(email).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST,"Khong tim thay user")
+        );
+
+        return ConvertUserToDTo(user);
+
+    }
 
     public String generatePhoneOtp(UserRequest request){
 

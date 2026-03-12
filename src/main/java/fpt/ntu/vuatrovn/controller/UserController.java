@@ -1,10 +1,13 @@
 package fpt.ntu.vuatrovn.controller;
 
 import fpt.ntu.vuatrovn.dto.UserRequest;
+import fpt.ntu.vuatrovn.dto.UserResponse;
 import fpt.ntu.vuatrovn.service.SmsService;
 import fpt.ntu.vuatrovn.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,6 +18,15 @@ public class UserController {
     private final SmsService service;
 
     private final UserService userService;
+
+    @GetMapping("/account")
+    public ResponseEntity<?> getUserInfo(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        Gọi service để lấy thông tin người dùng và gán lại cho dto
+
+        UserResponse response = this.userService.getUserInfo(authentication.getName());
+        return ResponseEntity.ok(response);
+    }
 
     @PostMapping("/sendOtp") /* sinh mã otp */
     public ResponseEntity<?> generateOtp(@RequestBody UserRequest request) {
