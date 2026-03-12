@@ -15,6 +15,14 @@ public class CreatePostRequest {
      private Double latitude;
      private Double longitude;
 
+     private String address;
+
+    private String description;
+
+    private List<MultipartFile> images;
+
+
+    // Getter & Setter
      public Double getLatitude() {
          return this.latitude;
      }
@@ -38,8 +46,7 @@ public class CreatePostRequest {
     public void setTypeId(Long typeId) {
         this.typeId = typeId;
     }
-
-    private String address;
+    
 
     public String getAddress() {
         return this.address;
@@ -48,10 +55,6 @@ public class CreatePostRequest {
     public void setAddress(String address) {
         this.address = address;
     }
-
-    private String description;
-
-    private List<MultipartFile> images;
 
     public List<MultipartFile> getImages() {
         return this.images;
