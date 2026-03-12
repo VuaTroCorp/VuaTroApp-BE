@@ -44,4 +44,21 @@ public class SupabaseStorageService {
         return supabaseUrl + "/storage/v1/object/public/"
                 + bucket + "/" + fileName;
     }
+
+    // Delete Image
+    public void deleteFile(String fileUrl) {
+
+        String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+
+        String deleteUrl = supabaseUrl + "/storage/v1/object/"
+                + bucket + "/" + fileName;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("apikey", supabaseKey);
+        headers.set("Authorization", "Bearer " + supabaseKey);
+
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        restTemplate.exchange(deleteUrl, HttpMethod.DELETE, request, String.class);
+    }
 }

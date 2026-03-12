@@ -2,6 +2,8 @@ package fpt.ntu.vuatrovn.dto;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public class CreatePostRequest {
     private String title;
     private Float price;
@@ -13,6 +15,14 @@ public class CreatePostRequest {
      private Double latitude;
      private Double longitude;
 
+     private String address;
+
+    private String description;
+
+    private List<MultipartFile> images;
+
+
+    // Getter & Setter
      public Double getLatitude() {
          return this.latitude;
      }
@@ -36,8 +46,7 @@ public class CreatePostRequest {
     public void setTypeId(Long typeId) {
         this.typeId = typeId;
     }
-
-    private String address;
+    
 
     public String getAddress() {
         return this.address;
@@ -47,9 +56,13 @@ public class CreatePostRequest {
         this.address = address;
     }
 
-    private String description;
+    public List<MultipartFile> getImages() {
+        return this.images;
+    }
 
-    private List<String> imageUrls;
+    public void setImages(List<MultipartFile> images) {
+        this.images = images;
+    }
 
     public String getTitle() {
         return this.title;
@@ -91,13 +104,7 @@ public class CreatePostRequest {
         this.description = description;
     }
 
-    public List<String> getImageUrls() {
-        return this.imageUrls;
-    }
 
-    public void setImageUrls(List<String> imageUrls) {
-        this.imageUrls = imageUrls;
-    }
     
 
 }
