@@ -1,5 +1,6 @@
 package fpt.ntu.vuatrovn.controller;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,18 +12,24 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import fpt.ntu.vuatrovn.dto.CreatePostRequest;
 import fpt.ntu.vuatrovn.dto.PostSearchRequest;
+import fpt.ntu.vuatrovn.dto.UpdatePostRequest;
 import fpt.ntu.vuatrovn.entity.Post;
 import fpt.ntu.vuatrovn.service.PostService;
+import fpt.ntu.vuatrovn.service.RentalRegistrationService;
+import fpt.ntu.vuatrovn.service.SupabaseStorageService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,14 +41,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class PostController {
 
     private final PostService postService;
+    private final RentalRegistrationService rentalRegistrationService;
 
-    // Đã tiêm cả 2 Service vào Constructor
-    public PostController(PostService postService) {
+    public PostController(PostService postService,
+                          RentalRegistrationService rentalRegistrationService) {
         this.postService = postService;
+        this.rentalRegistrationService = rentalRegistrationService;
     }
 
     // ==========================================
-    // 1. API TẠO BÀI ĐĂNG (Bị Git cắt ngang)
+    // 1. API TẠO BÀI ĐĂNG
     // ==========================================
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createPost(
@@ -72,6 +81,7 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
     }
+
     // ==========================================
     // 2. API TÌM KIẾM BÀI ĐĂNG (Của bạn)
     // ==========================================
@@ -94,4 +104,92 @@ public class PostController {
         
         return ResponseEntity.ok(result);
     }
+
+    // ==========================================
+    // 3. GET POST DETAIL
+    // ==========================================  
+    @GetMapping("/{id}")
+    public ResponseEntity<Post> getPostDetail(@PathVariable Long id) {
+
+        Post post = postService.getPostDetail(id);
+
+        return ResponseEntity.ok(post);
+    }
+
+
+    // ==========================================
+    // 4. EDIT POST API
+    // ==========================================   
+    @PostMapping(value = "/edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updatePost(
+            @Parameter(description = "ID bài đăng") 
+            @PathVariable Long id,
+            @ModelAttribute UpdatePostRequest request,
+            Authentication authentication
+    ) {
+
+        if (authentication == null) {
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("status", 401);
+            response.put("message", "Bạn chưa đăng nhập");
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(response);
+        }
+
+        String email = authentication.getName();
+
+        postService.updatePost(id, request, email);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("status", 200);
+        response.put("message", "Cập nhật bài đăng thành công");
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ==========================================
+    // 5. DELETE POST API
+    // ========================================== 
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deletePost(@PathVariable Long id, Authentication authentication){
+        String email = authentication.getName();
+        postService.deletePost(id, email);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("status", 200);
+        response.put("message", "Cập nhật bài đăng thành công");
+        return ResponseEntity.ok(response);
+    }
+    @PostMapping("/{postId}/register-view")
+public ResponseEntity<?> registerViewRoom(
+        @PathVariable Long postId,
+        Authentication authentication
+) {
+
+    if(authentication == null){
+
+        Map<String,Object> response = new HashMap<>();
+        response.put("status",401);
+        response.put("message","Bạn chưa đăng nhập");
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(response);
+    }
+
+    String email = authentication.getName();
+
+    rentalRegistrationService.registerViewRoom(postId,email);
+
+    Map<String,Object> response = new HashMap<>();
+    response.put("status",200);
+    response.put("message",
+            "Your request has been sent. Please wait for landlord confirmation.");
+
+    return ResponseEntity.ok(response);
+}
 }

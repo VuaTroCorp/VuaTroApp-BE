@@ -29,13 +29,19 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         OAuth2User user = (OAuth2User) authentication.getPrincipal();
 
+        // 1. Lấy email từ Google
         String email = user.getAttribute("email");
-        String username = user.getAttribute("username");
-        String role = user.getAttribute("role");
+        
+        // 2. Lấy tên hiển thị từ Google để làm username
+        String name = user.getAttribute("name");
+        
+        // 3. Mặc định cấp quyền "USER" cho người đăng nhập bằng Google
+        String role = "USER";
 
-        String token = jwtService.generateToken(email, username, role);
+        // 🔥 Đã sửa lỗi: Truyền đầy đủ 3 tham số (email, username, role)
+        String token = jwtService.generateToken(email, name, role);
 
-        response.setContentType("application/json");
-        response.getWriter().write("{\"token\":\"" + token + "\"}");
+        String redirectUrl = "http://localhost:3000/login/oauth2/code/google?token=" + token;
+        response.sendRedirect(redirectUrl);
     }
 }
