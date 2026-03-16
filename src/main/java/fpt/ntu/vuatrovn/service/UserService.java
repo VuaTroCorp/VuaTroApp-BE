@@ -163,7 +163,7 @@ public class UserService {
                 otpVerifications.setTargetValue(request.getNewEmail());
                 otpVerificationRepository.save(otpVerifications);
 
-                emailService.sendOtpEmail(request.getNewEmail(),emailOtp);
+                emailService.confirmEmailChangeOtp(request.getNewEmail(),emailOtp);
 
                 return  "OTP đã được gửi tới email " + request.getNewEmail() +
                         ". Vui lòng kiểm tra email";
@@ -188,7 +188,7 @@ public class UserService {
         otpVerificationRepository.save(otpVerifications);
 
 //        gửi mail
-        emailService.sendOtpEmail(request.getNewEmail(),emailOtp);
+        emailService.confirmEmailChangeOtp(request.getNewEmail(),emailOtp);
         return  "OTP đã được gửi tới email " + request.getNewEmail() +
                 ". Vui lòng kiểm tra email.";
     }

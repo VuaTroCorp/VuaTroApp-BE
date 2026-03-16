@@ -97,7 +97,7 @@ public class EmailService {
         }
     }
 
-    public void sendOtpEmail(String email, String otp) {
+    public void confirmEmailChangeOtp(String email, String otp) {
 
         String link =
                 "http://localhost:8080/api/user/verify-otp?email=" + email + "&otp=" + otp;
