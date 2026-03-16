@@ -3,8 +3,12 @@ package fpt.ntu.vuatrovn.controller;
 import java.util.HashMap;
 import java.util.Map;
 
+import fpt.ntu.vuatrovn.dto.UserResponse;
+import fpt.ntu.vuatrovn.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,8 +29,10 @@ public class AuthController {
 
     private final AuthService authService;
 
-    public AuthController(AuthService authService) {
+    private final UserService userService;
+    public AuthController(AuthService authService,UserService userService) {
         this.authService = authService;
+        this.userService = userService;
     }
 
     // =========================
@@ -65,6 +71,15 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<?> getUserInfo(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        Gọi service để lấy thông tin người dùng và gán lại cho dto
+
+        UserResponse response = this.userService.getUserInfo(authentication.getName());
         return ResponseEntity.ok(response);
     }
 }

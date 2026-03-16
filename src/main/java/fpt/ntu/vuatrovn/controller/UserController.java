@@ -19,14 +19,6 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/account")
-    public ResponseEntity<?> getUserInfo(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        Gọi service để lấy thông tin người dùng và gán lại cho dto
-
-        UserResponse response = this.userService.getUserInfo(authentication.getName());
-        return ResponseEntity.ok(response);
-    }
 
     @PostMapping("/sendOtp") /* sinh mã otp */
     public ResponseEntity<?> generateOtp(@RequestBody UserRequest request) {
