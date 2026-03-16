@@ -47,4 +47,6 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<OtpVerifications> otpVerifications;
+    @OneToOne(mappedBy = "user")
+    private PasswordReset passwordReset;
 }
