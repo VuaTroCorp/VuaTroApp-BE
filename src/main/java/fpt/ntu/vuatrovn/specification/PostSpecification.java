@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PostSpecification {
 
@@ -19,14 +20,54 @@ public class PostSpecification {
             predicates.add(cb.equal(root.get("status"), PostStatus.APPROVE));
 
             if (request != null) {
-                // 2. Tìm theo từ khóa (Tìm trong Title HOẶC Decription)
+                // ==========================================
+                // 🔥 2. TÌM THEO TỪ KHÓA (TỪ ĐIỂN MỞ RỘNG V2)
+                // ==========================================
                 if (request.getKeyword() != null && !request.getKeyword().trim().isEmpty()) {
-                    String pattern = "%" + request.getKeyword().toLowerCase() + "%";
-                    Predicate titleMatch = cb.like(cb.lower(root.get("title")), pattern);
-                    Predicate descMatch = cb.like(cb.lower(root.get("decription")), pattern); // Viết đúng theo tên biến của team
-                    predicates.add(cb.or(titleMatch, descMatch));
+                    String kw = request.getKeyword().toLowerCase().trim();
+                    List<Predicate> keywordPredicates = new ArrayList<>();
+                    List<String> searchTerms = new ArrayList<>();
+                    
+                    // Thêm từ khóa gốc do người dùng gõ
+                    searchTerms.add(kw);
+
+                    // Bộ từ điển "Bao trọn gói" các thói quen gõ phím của người dùng
+                    if (kw.contains("nhà trọ") || kw.contains("nha tro")) {
+                        searchTerms.add("phòng trọ");
+                        searchTerms.add("phong tro");
+                        searchTerms.add("nhà trọ");
+                        searchTerms.add("nha tro");
+                        searchTerms.add("phòng cho thuê");
+                        searchTerms.add("nhà cho thuê");
+                    } else if (kw.contains("phòng trọ") || kw.contains("phong tro") || kw.contains("phòng cho thuê")) {
+                        searchTerms.add("nhà trọ");
+                        searchTerms.add("nha tro");
+                        searchTerms.add("phòng trọ");
+                        searchTerms.add("phong tro");
+                        searchTerms.add("nhà cho thuê");
+                    }
+
+                    // Loại bỏ các từ khóa bị trùng lặp để tối ưu tốc độ chạy SQL
+                    List<String> uniqueTerms = searchTerms.stream().distinct().collect(Collectors.toList());
+
+                    // Quét toàn bộ danh sách từ khóa trong cả Title và Decription
+                    for (String term : uniqueTerms) {
+                        String pattern = "%" + term + "%";
+                        Predicate titleMatch = cb.like(cb.lower(root.get("title")), pattern);
+                        Predicate descMatch = cb.like(cb.lower(root.get("decription")), pattern); // Vẫn giữ 'decription' theo DB của team
+                        
+                        // Nghĩa là: Tiêu đề chứa từ khóa HOẶC Mô tả chứa từ khóa
+                        keywordPredicates.add(cb.or(titleMatch, descMatch));
+                    }
+                    
+                    // Gom tất cả các trường hợp lại: Chỉ cần khớp 1 trong các từ khóa là lấy bài đó
+                    predicates.add(cb.or(keywordPredicates.toArray(new Predicate[0])));
                 }
 
+                // ==========================================
+                // CÁC BỘ LỌC KHÁC (GIỮ NGUYÊN BẢN GỐC)
+                // ==========================================
+                
                 // 3. Lọc theo khoảng Giá (Price)
                 if (request.getMinPrice() != null) {
                     predicates.add(cb.greaterThanOrEqualTo(root.get("price"), request.getMinPrice()));
