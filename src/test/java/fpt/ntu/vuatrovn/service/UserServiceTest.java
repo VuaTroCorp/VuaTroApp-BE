@@ -168,7 +168,7 @@ public class UserServiceTest {
 
         assertTrue(result.contains("OTP"));
 
-        verify(emailService).sendOtpEmail(eq("new@gmail.com"),any());
+        verify(emailService).confirmEmailChangeOtp(eq("new@gmail.com"),any());
 
     }
 
