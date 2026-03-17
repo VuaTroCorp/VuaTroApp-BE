@@ -7,7 +7,9 @@ import fpt.ntu.vuatrovn.entity.User;
 import fpt.ntu.vuatrovn.enums.OtpType;
 import fpt.ntu.vuatrovn.repository.OtpVerificationRepository;
 import fpt.ntu.vuatrovn.repository.UserRepository;
+import fpt.ntu.vuatrovn.service.email.EmailSender;
 import fpt.ntu.vuatrovn.service.email.EmailService;
+import fpt.ntu.vuatrovn.service.sms.SmsSender;
 import fpt.ntu.vuatrovn.service.sms.SmsService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,9 +40,9 @@ public class UserServiceTest {
     private OtpVerificationRepository otpVerificationRepository;
 
     @Mock
-    private SmsService smsService;
+    private SmsSender smsService;
     @Mock
-    private EmailService emailService;
+    private EmailSender emailService;
 
     @InjectMocks
     private UserService userService;
