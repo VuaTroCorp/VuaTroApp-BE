@@ -90,6 +90,7 @@ public class PostService {
                     images.add(image);
 
                 } catch (Exception e) {
+                    e.printStackTrace();
                     throw new RuntimeException("Upload ảnh thất bại");
                 }
             }
