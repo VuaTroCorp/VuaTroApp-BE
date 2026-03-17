@@ -24,26 +24,17 @@ import fpt.ntu.vuatrovn.repository.PostRepository;
 import fpt.ntu.vuatrovn.repository.TypeRepository;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import fpt.ntu.vuatrovn.specification.PostSpecification;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final TypeRepository typeRepository;
     private final SupabaseStorageService supabaseStorageService;
-
-    public PostService(PostRepository postRepository,
-                       UserRepository userRepository,
-                       TypeRepository typeRepository,
-                       SupabaseStorageService supabaseStorageService) {
-
-        this.postRepository = postRepository;
-        this.userRepository = userRepository;
-        this.typeRepository = typeRepository;
-        this.supabaseStorageService = supabaseStorageService;
-    }
 
     // ==========================================
     // 1. CREATE POST
@@ -57,7 +48,7 @@ public class PostService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Room type not found"));
 
         if (request.getPrice() == null || request.getPrice() <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Giá phải lớn hơn 0");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The price must be greater than 0.");
         }
 
         Post post = new Post();
@@ -90,7 +81,7 @@ public class PostService {
                     images.add(image);
 
                 } catch (Exception e) {
-                    throw new RuntimeException("Upload ảnh thất bại");
+                    throw new RuntimeException("Upload image failed");
                 }
             }
         }
@@ -124,17 +115,17 @@ public class PostService {
     public void updatePost(Long postId, UpdatePostRequest request, String email) {
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post không tồn tại"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User không tồn tại"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         if (!post.getUser().getId().equals(user.getId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền sửa bài đăng này");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to edit this post.");
         }
 
         RoomType type = typeRepository.findById(request.getTypeId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Type không tồn tại"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Type not found"));
 
         // Update thông tin
         post.setTitle(request.getTitle());
@@ -167,7 +158,7 @@ public class PostService {
             });
         }
 
-        // Thêm ảnh mới
+        // Add new image
         if (request.getNewImages() != null && !request.getNewImages().isEmpty()) {
 
             int index = post.getImages().size();
@@ -199,17 +190,35 @@ public class PostService {
     public void deletePost(Long postId, String email) {
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post không tồn tại"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User không tồn tại"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         if (!post.getUser().getId().equals(user.getId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền xóa bài đăng này");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to delete this post.");
         }
 
         post.setStatus(PostStatus.DELETED);
 
         postRepository.save(post);
+    }
+
+    // ==========================================
+    // 6. GET ALL POSTS API
+    // ==========================================
+    public List<Post> getAllPosts(){
+        return postRepository.findByStatus(PostStatus.APPROVED);
+    }
+
+    // ==========================================
+    // 7. GET USER'S POSTS API
+    // ==========================================
+    public List<Post> getMyPosts(Long postId, String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return postRepository.findByUser(user);
     }
 }

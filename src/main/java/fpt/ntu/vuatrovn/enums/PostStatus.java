@@ -1,8 +1,7 @@
 package fpt.ntu.vuatrovn.enums;
 
-
 public enum PostStatus {
-    APPROVE,
+    APPROVED,
     PENDING,
     REJECTED,
     DELETED

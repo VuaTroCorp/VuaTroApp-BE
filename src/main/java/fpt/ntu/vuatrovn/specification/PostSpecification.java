@@ -16,7 +16,7 @@ public class PostSpecification {
             List<Predicate> predicates = new ArrayList<>();
 
             // 1. CHỈ hiển thị các bài đăng đã được DUYỆT (APPROVE)
-            predicates.add(cb.equal(root.get("status"), PostStatus.APPROVE));
+            predicates.add(cb.equal(root.get("status"), PostStatus.APPROVED));
 
             if (request != null) {
                 // 2. Tìm theo từ khóa (Tìm trong Title HOẶC Decription)
