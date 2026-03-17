@@ -12,4 +12,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     
     // Spring Data JPA sẽ tự động viết câu query SQL để tìm tất cả bình luận theo ID bài viết
     List<Review> findByPostId(Long postId);
+    // Kiểm tra xem User này đã từng đánh giá Post này chưa
+    boolean existsByUserIdAndPostId(Long userId, Long postId);
 }

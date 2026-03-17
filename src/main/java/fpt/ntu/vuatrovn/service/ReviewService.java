@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import fpt.ntu.vuatrovn.dto.CreateReviewRequest;
+import fpt.ntu.vuatrovn.dto.UpdateReviewRequest;
 import fpt.ntu.vuatrovn.entity.Post;
 import fpt.ntu.vuatrovn.entity.Review;
 import fpt.ntu.vuatrovn.entity.User;
@@ -41,14 +42,20 @@ public class ReviewService {
         if (request.getContent() == null || request.getContent().trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nội dung bình luận không được để trống");
         }
-
+        
+        
         // 2. Tìm User và Post trong Database
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy thông tin người dùng"));
                 
         Post post = postRepository.findById(request.getPostId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy bài đăng này"));
-
+        
+        // trùng lặp đánh giá bài đăng cùng 1 người dùng
+        if (reviewRepository.existsByUserIdAndPostId(user.getId(), post.getId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                "Bạn đã đánh giá bài đăng này rồi. Xin vui lòng sử dụng chức năng Sửa đánh giá!");
+        }
         // 3. Khởi tạo đối tượng Review và map dữ liệu
         Review review = new Review();
         review.setRating(request.getRating());
@@ -66,5 +73,41 @@ public class ReviewService {
     // ==========================================
     public List<Review> getReviewsByPostId(Long postId) {
         return reviewRepository.findByPostId(postId); 
+    }
+    // ==========================================
+    // SỬA BÌNH LUẬN (Chỉ chính chủ mới được sửa)
+    // ==========================================
+    public void updateReview(Long reviewId, UpdateReviewRequest request, String email) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy đánh giá này"));
+
+        // Kiểm tra xem người đang sửa có phải là tác giả của đánh giá không
+        if (!review.getUser().getEmail().equals(email)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền sửa đánh giá của người khác");
+        }
+
+        // Validate dữ liệu mới
+        if (request.getRating() != null && request.getRating() >= 1 && request.getRating() <= 5) {
+            review.setRating(request.getRating());
+        }
+        if (request.getContent() != null && !request.getContent().trim().isEmpty()) {
+            review.setContent(request.getContent());
+        }
+
+        reviewRepository.save(review);
+    }
+
+    // ==========================================
+    // XÓA BÌNH LUẬN (Chỉ chính chủ mới được xóa)
+    // ==========================================
+    public void deleteReview(Long reviewId, String email) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Không tìm thấy đánh giá này"));
+
+        if (!review.getUser().getEmail().equals(email)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền xóa đánh giá của người khác");
+        }
+
+        reviewRepository.delete(review);
     }
 }
