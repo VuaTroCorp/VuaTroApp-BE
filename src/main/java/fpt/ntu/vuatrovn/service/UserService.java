@@ -7,11 +7,14 @@ import fpt.ntu.vuatrovn.entity.User;
 import fpt.ntu.vuatrovn.enums.OtpType;
 import fpt.ntu.vuatrovn.repository.OtpVerificationRepository;
 import fpt.ntu.vuatrovn.repository.UserRepository;
+import fpt.ntu.vuatrovn.service.email.EmailSender;
+import fpt.ntu.vuatrovn.service.email.EmailService;
+import fpt.ntu.vuatrovn.service.sms.SmsSender;
+import fpt.ntu.vuatrovn.service.sms.SmsService;
 import lombok.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -29,9 +32,10 @@ public class UserService {
 
     private final OtpVerificationRepository otpVerificationRepository;
 
-    private final SmsService smsService;
+    /*Add loose coupling*/
+    private final SmsSender smsService;
 
-    private final EmailService emailService;
+    private final EmailSender emailService;
 
     public UserResponse ConvertUserToDTo(User user){
         return UserResponse.builder()

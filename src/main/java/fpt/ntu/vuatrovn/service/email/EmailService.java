@@ -1,4 +1,4 @@
-package fpt.ntu.vuatrovn.service;
+package fpt.ntu.vuatrovn.service.email;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -8,7 +8,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class EmailService {
+public class EmailService implements EmailSender{
 
     private final JavaMailSender mailSender;
 
@@ -16,6 +16,7 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
+    @Override
     public void sendVerificationEmail(String email, String token) {
 
         String link =
@@ -97,6 +98,7 @@ public class EmailService {
         }
     }
 
+    @Override
     public void sendOtpEmail(String email, String resetToken) {
 
         String link =
@@ -171,6 +173,7 @@ public class EmailService {
         }
     }
 
+    @Override
     public void confirmEmailChangeOtp(String email, String otp) {
 
         String link =

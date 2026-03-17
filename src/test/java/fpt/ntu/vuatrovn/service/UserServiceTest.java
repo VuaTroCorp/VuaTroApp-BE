@@ -7,6 +7,8 @@ import fpt.ntu.vuatrovn.entity.User;
 import fpt.ntu.vuatrovn.enums.OtpType;
 import fpt.ntu.vuatrovn.repository.OtpVerificationRepository;
 import fpt.ntu.vuatrovn.repository.UserRepository;
+import fpt.ntu.vuatrovn.service.email.EmailService;
+import fpt.ntu.vuatrovn.service.sms.SmsService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,7 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -249,19 +250,6 @@ public class UserServiceTest {
 
         verify(otpVerificationRepository).delete(otp);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

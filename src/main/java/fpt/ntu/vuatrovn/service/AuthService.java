@@ -10,12 +10,12 @@ import fpt.ntu.vuatrovn.enums.UserStatus;
 import fpt.ntu.vuatrovn.repository.PasswordResetRepository;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import fpt.ntu.vuatrovn.repository.VerificationTokenRepository;
+import fpt.ntu.vuatrovn.service.email.EmailService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
