@@ -10,6 +10,7 @@ import fpt.ntu.vuatrovn.enums.UserStatus;
 import fpt.ntu.vuatrovn.repository.PasswordResetRepository;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import fpt.ntu.vuatrovn.repository.VerificationTokenRepository;
+import fpt.ntu.vuatrovn.service.email.EmailService;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;

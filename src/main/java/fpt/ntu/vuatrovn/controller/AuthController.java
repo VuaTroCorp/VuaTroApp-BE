@@ -3,6 +3,7 @@ package fpt.ntu.vuatrovn.controller;
 import fpt.ntu.vuatrovn.dto.*;
 import fpt.ntu.vuatrovn.service.AuthService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,13 +16,10 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 @Tag(name = "Authentication API", description = "Account management API")
 @CrossOrigin("*")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
-
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
 
     // =========================
     // 1️⃣ SIGNUP (ĐĂNG KÝ)
