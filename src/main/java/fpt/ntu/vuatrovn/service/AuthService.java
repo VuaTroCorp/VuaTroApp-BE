@@ -11,11 +11,14 @@ import fpt.ntu.vuatrovn.repository.PasswordResetRepository;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import fpt.ntu.vuatrovn.repository.VerificationTokenRepository;
 import fpt.ntu.vuatrovn.service.email.EmailService;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -23,6 +26,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
     private final UserRepository userRepository; 
     
@@ -31,21 +35,6 @@ public class AuthService {
     private final EmailService emailService;
     private final PasswordResetRepository passwordResetRepository;
     private final JwtService jwtService;
-
-    // Constructor Injection
-    public AuthService(UserRepository userRepository,
-                       VerificationTokenRepository tokenRepository,
-                       PasswordEncoder passwordEncoder,
-                       EmailService emailService,
-                       PasswordResetRepository passwordResetRepository,
-                       JwtService jwtService) {
-        this.userRepository = userRepository; // Bây giờ gán mới không bị lỗi nữa
-        this.tokenRepository = tokenRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.emailService = emailService;
-        this.passwordResetRepository = passwordResetRepository;
-        this.jwtService = jwtService;
-    }
 
     // =========================
     // 1. ĐĂNG KÝ (SIGNUP)

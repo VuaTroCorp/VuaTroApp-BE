@@ -4,40 +4,60 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 public class CreatePostRequest {
+
+    @NotBlank(message = "Title is required")
     private String title;
+
+    @NotNull(message = "Price is required")
+    @Positive(message = "Price must be greater than 0")
     private Float price;
+
+    @NotNull(message = "Area is required")
+    @Positive(message = "Area must be greater than 0")
     private Float area;
+
+    @Positive(message = "Room quantity must be greater than 0")
     private int roomQuantity;
 
-     private Long typeId;
+    @NotNull(message = "Type ID is required")
+    private Long typeId;
 
-     private Double latitude;
-     private Double longitude;
+    @NotNull(message = "Latitude is required")
+    private Double latitude;
 
-     private String address;
+    @NotNull(message = "Longitude is required")
+    private Double longitude;
 
+    @NotBlank(message = "Address is required")
+    private String address;
+
+    @NotBlank(message = "Description is required")
     private String description;
 
     private List<MultipartFile> images;
 
+    // ================= GETTER SETTER =================
 
-    // Getter & Setter
-     public Double getLatitude() {
-         return this.latitude;
-     }
+    public Double getLatitude() {
+        return this.latitude;
+    }
 
-     public void setLatitude(Double latitude) {
-         this.latitude = latitude;
-     }
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
 
-     public Double getLongitude() {
-         return this.longitude;
-     }
+    public Double getLongitude() {
+        return this.longitude;
+    }
 
-     public void setLongitude(Double longitude) {
-         this.longitude = longitude;
-     }
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
 
     public Long getTypeId() {
         return this.typeId;
@@ -46,7 +66,6 @@ public class CreatePostRequest {
     public void setTypeId(Long typeId) {
         this.typeId = typeId;
     }
-    
 
     public String getAddress() {
         return this.address;
@@ -103,8 +122,4 @@ public class CreatePostRequest {
     public void setDescription(String description) {
         this.description = description;
     }
-
-
-    
-
 }

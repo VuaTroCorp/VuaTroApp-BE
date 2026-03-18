@@ -1,28 +1,10 @@
 package fpt.ntu.vuatrovn.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import fpt.ntu.vuatrovn.dto.UserResponse;
-import fpt.ntu.vuatrovn.service.UserService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import fpt.ntu.vuatrovn.dto.LoginRequest;
-import fpt.ntu.vuatrovn.dto.LoginResponse;
-import fpt.ntu.vuatrovn.dto.SignupRequest;
-import fpt.ntu.vuatrovn.service.AuthService;
 import fpt.ntu.vuatrovn.dto.*;
 import fpt.ntu.vuatrovn.service.AuthService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,16 +14,12 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Authentication API", description = "Account management API")
 @CrossOrigin("*")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
-
-    private final UserService userService;
-    public AuthController(AuthService authService,UserService userService) {
-        this.authService = authService;
-        this.userService = userService;
-    }
 
     // =========================
     // 1️⃣ SIGNUP (ĐĂNG KÝ)
@@ -82,14 +60,6 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/profile")
-    public ResponseEntity<?> getUserInfo(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        Gọi service để lấy thông tin người dùng và gán lại cho dto
-
-        UserResponse response = this.userService.getUserInfo(authentication.getName());
-        return ResponseEntity.ok(response);
-    }
     // 4️⃣ FORGOT PASSWORD (QUÊN MẬT KHẨU)
     @PostMapping("/forgot-password")
     public ResponseEntity<?> requestPasswordReset(@RequestBody ForgotPasswordRequest request){

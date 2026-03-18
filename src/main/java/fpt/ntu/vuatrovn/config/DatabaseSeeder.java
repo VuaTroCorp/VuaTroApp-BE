@@ -16,7 +16,6 @@ public class DatabaseSeeder {
     @Bean
     CommandLineRunner initDatabase(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
-            if (userRepository.count() == 0) {
                 User admin = new User();
                 admin.setEmail("admin@vuatro.com");
                 
@@ -32,7 +31,6 @@ public class DatabaseSeeder {
                 System.out.println("---------------------------------------------");
                 System.out.println("DA TAO USER MAU: admin@vuatro.com / 123456");
                 System.out.println("---------------------------------------------");
-            }
         };
     }
 }

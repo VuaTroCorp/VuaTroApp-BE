@@ -10,23 +10,15 @@ import fpt.ntu.vuatrovn.enums.RentalStatus;
 import fpt.ntu.vuatrovn.repository.PostRepository;
 import fpt.ntu.vuatrovn.repository.RentalRegistrationRepository;
 import fpt.ntu.vuatrovn.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class RentalRegistrationService {
 
     private final RentalRegistrationRepository registrationRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-
-    public RentalRegistrationService(
-            RentalRegistrationRepository registrationRepository,
-            PostRepository postRepository,
-            UserRepository userRepository
-    ) {
-        this.registrationRepository = registrationRepository;
-        this.postRepository = postRepository;
-        this.userRepository = userRepository;
-    }
 
     public void registerViewRoom(Long postId, String email){
 

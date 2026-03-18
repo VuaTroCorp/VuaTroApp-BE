@@ -1,13 +1,13 @@
 package fpt.ntu.vuatrovn.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 // 🔥 CÁC DÒNG IMPORT QUAN TRỌNG ĐÃ ĐƯỢC BỔ SUNG
 import fpt.ntu.vuatrovn.enums.Provider;
 import fpt.ntu.vuatrovn.enums.Role;
 import fpt.ntu.vuatrovn.enums.UserStatus;
 import jakarta.persistence.*; // Dành cho @Entity, @Id, @Column...
 import lombok.*;            // Dành cho @Data, @Builder...
-
-import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -27,6 +27,7 @@ public class User {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
+    @JsonIgnore
     @Column(name = "password")
     private String password;
 
@@ -45,8 +46,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToMany(mappedBy = "user")
-    private List<OtpVerifications> otpVerifications;
     @OneToOne(mappedBy = "user")
     private PasswordReset passwordReset;
 }
