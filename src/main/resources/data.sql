@@ -4,21 +4,11 @@ INSERT INTO room_type (type_name) VALUES ('Kí Túc Xá');
 
 INSERT INTO users (username, email, password, phone, provider, provider_id, status, role)
 VALUES
-('hh','hh@gmail.com',
-'$2a$10$h7I9JzDD12gQoANhR3CV8eJUo01c9Pa3vl2ic/.J1pGXYhOK1R02y',
-'0900000001','LOCAL',NULL,'ACTIVE','USER'),
-('huy','huy@gmail.com',
-'$2a$10$h7I9JzDD12gQoANhR3CV8eJUo01c9Pa3vl2ic/.J1pGXYhOK1R02y',
-'0900000002','LOCAL',NULL,'ACTIVE','USER'),
-('admin','admin@gmail.com',
-'$2a$10$h7I9JzDD12gQoANhR3CV8eJUo01c9Pa3vl2ic/.J1pGXYhOK1R02y',
-'0900000003','LOCAL',NULL,'ACTIVE','ADMIN'),
-('linh','linh@gmail.com',
-'$2a$10$h7I9JzDD12gQoANhR3CV8eJUo01c9Pa3vl2ic/.J1pGXYhOK1R02y',
-'0900000004','LOCAL',NULL,'ACTIVE','USER'),
-('khanh','khanh@gmail.com',
-'$2a$10$h7I9JzDD12gQoANhR3CV8eJUo01c9Pa3vl2ic/.J1pGXYhOK1R02y',
-'0900000005','LOCAL',NULL,'ACTIVE','USER');
+('hh', 'hh@gmail.com', '$2a$10$h7I9JzDD12gQoANhR3CV8eJUo01c9Pa3vl2ic/.J1pGXYhOK1R02y', '0900000001', 'LOCAL', NULL, 'ACTIVE', 'USER'),
+('huy', 'huy@gmail.com', '$2a$10$h7I9JzDD12gQoANhR3CV8eJUo01c9Pa3vl2ic/.J1pGXYhOK1R02y', '0900000002', 'LOCAL', NULL, 'ACTIVE', 'USER'),
+('admin', 'admin@gmail.com', '$2a$10$h7I9JzDD12gQoANhR3CV8eJUo01c9Pa3vl2ic/.J1pGXYhOK1R02y', '0900000003', 'LOCAL', NULL, 'ACTIVE', 'ADMIN'),
+('linh', 'linh@gmail.com', '$2a$10$h7I9JzDD12gQoANhR3CV8eJUo01c9Pa3vl2ic/.J1pGXYhOK1R02y', '0900000004', 'LOCAL', NULL, 'ACTIVE', 'USER'),
+('khanh', 'khanh@gmail.com', '$2a$10$h7I9JzDD12gQoANhR3CV8eJUo01c9Pa3vl2ic/.J1pGXYhOK1R02y', '0900000005', 'LOCAL', NULL, 'ACTIVE', 'USER');
 
 
 INSERT INTO post 
