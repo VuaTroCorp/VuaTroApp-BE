@@ -8,9 +8,9 @@ import fpt.ntu.vuatrovn.enums.OtpType;
 import fpt.ntu.vuatrovn.repository.OtpVerificationRepository;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import fpt.ntu.vuatrovn.service.email.EmailSender;
-import fpt.ntu.vuatrovn.service.email.EmailService;
 import fpt.ntu.vuatrovn.service.sms.SmsSender;
-import fpt.ntu.vuatrovn.service.sms.SmsService;
+import fpt.ntu.vuatrovn.service.user.UserService;
+import fpt.ntu.vuatrovn.service.user.UserServiceImp;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
+public class UserServiceImpTest {
 
     @Mock
     private UserRepository userRepository;
@@ -45,7 +45,7 @@ public class UserServiceTest {
     private EmailSender emailService;
 
     @InjectMocks
-    private UserService userService;
+    private UserService userServiceImp;
 
 
 
@@ -82,7 +82,7 @@ public class UserServiceTest {
     void getUserInfo_success(){
         when(userRepository.findByEmail("test@gmail.com")).thenReturn(Optional.of(user));
 
-        UserResponse response = userService.getUserInfo("test@gmail.com");
+        UserResponse response = userServiceImp.getUserInfo("test@gmail.com");
         assertEquals("testUser",response.getUsername());
         assertEquals("test@gmail.com",response.getEmail());
     }
@@ -92,7 +92,7 @@ public class UserServiceTest {
     void getUserInfo_UserNotFound(){
         when(userRepository.findByEmail("test@gmail.com")).thenReturn(Optional.empty());
 
-        assertThrows(ResponseStatusException.class,() -> userService.getUserInfo("test@gmail.com"));
+        assertThrows(ResponseStatusException.class,() -> userServiceImp.getUserInfo("test@gmail.com"));
     }
 /*----------------------------------- Sinh Otp Phone -------------------------------------*/
     /*Test case 3: Tạo otp cho phone thành công*/
@@ -109,7 +109,7 @@ public class UserServiceTest {
 
         when(otpVerificationRepository.findByTargetValue("0999999999")).thenReturn(Optional.empty());
 
-        String result = userService.generatePhoneOtp(request);
+        String result = userServiceImp.generatePhoneOtp(request);
 
         assertTrue(result.contains("OTP"));
 
@@ -129,7 +129,7 @@ public class UserServiceTest {
 
         when(userRepository.existsByPhone("0999999999")).thenReturn(true);
 
-        assertThrows(ResponseStatusException.class, () -> userService.generatePhoneOtp(request));
+        assertThrows(ResponseStatusException.class, () -> userServiceImp.generatePhoneOtp(request));
 
     }
 
@@ -150,7 +150,7 @@ public class UserServiceTest {
 
         when(otpVerificationRepository.findByTargetValue("0999999999")).thenReturn(Optional.of(otp));
 
-        assertThrows(ResponseStatusException.class,() -> userService.generatePhoneOtp(request));
+        assertThrows(ResponseStatusException.class,() -> userServiceImp.generatePhoneOtp(request));
     }
 
     /*------------------------------------ Sinh Otp Email --------------------------------*/
@@ -167,7 +167,7 @@ public class UserServiceTest {
 
         when(otpVerificationRepository.findByTargetValue("new@gmail.com")).thenReturn(Optional.empty());
 
-        String result = userService.generateEmailOtp(request);
+        String result = userServiceImp.generateEmailOtp(request);
 
         assertTrue(result.contains("OTP"));
 
@@ -187,7 +187,7 @@ public class UserServiceTest {
 
         when(userRepository.existsByEmail("new@gmail.com")).thenReturn(true);
 
-        assertThrows(ResponseStatusException.class,() -> userService.generateEmailOtp(request));
+        assertThrows(ResponseStatusException.class,() -> userServiceImp.generateEmailOtp(request));
     }
 
     /*Test case 8: otp email chưa hết hạn*/
@@ -207,7 +207,7 @@ public class UserServiceTest {
 
         when(otpVerificationRepository.findByTargetValue("new@gmail.com")).thenReturn(Optional.of(otp));
 
-        assertThrows(ResponseStatusException.class,() -> userService.generateEmailOtp(request));
+        assertThrows(ResponseStatusException.class,() -> userServiceImp.generateEmailOtp(request));
     }
 
     /*------------------------------------ Xác thực otp --------------------------------*/
@@ -222,7 +222,7 @@ public class UserServiceTest {
 
         when(otpVerificationRepository.findByTargetValueAndOtpAndType("new@gmail.com","123456", OtpType.EMAIL)).thenReturn(Optional.of(otp));
 
-        String result = userService.verifyOtp("new@gmail.com","123456");
+        String result = userServiceImp.verifyOtp("new@gmail.com","123456");
 
         assertEquals("xac thuc thanh cong", result);
 
@@ -233,7 +233,7 @@ public class UserServiceTest {
     @Test
     void verifyOtp_wrongOtp(){
         when(otpVerificationRepository.findByTargetValueAndOtpAndType("new@gmail.com","123456",OtpType.EMAIL)).thenReturn(Optional.empty());
-        assertThrows(ResponseStatusException.class,() -> userService.verifyOtp("new@gmail.com","123456"));
+        assertThrows(ResponseStatusException.class,() -> userServiceImp.verifyOtp("new@gmail.com","123456"));
     }
 
     /*Test case 11: Otp hết hạn trong lúc xác thực*/
@@ -248,7 +248,7 @@ public class UserServiceTest {
 
         when(otpVerificationRepository.findByTargetValueAndOtpAndType("new@gmail.com","123456",OtpType.EMAIL)).thenReturn(Optional.of(otp));
 
-        assertThrows(ResponseStatusException.class, () -> userService.verifyOtp("new@gmail.com","123456"));
+        assertThrows(ResponseStatusException.class, () -> userServiceImp.verifyOtp("new@gmail.com","123456"));
 
         verify(otpVerificationRepository).delete(otp);
     }

@@ -2,7 +2,8 @@ package fpt.ntu.vuatrovn.controller;
 
 import fpt.ntu.vuatrovn.dto.UserRequest;
 import fpt.ntu.vuatrovn.service.sms.SmsService;
-import fpt.ntu.vuatrovn.service.UserService;
+import fpt.ntu.vuatrovn.service.user.UserService;
+import fpt.ntu.vuatrovn.service.user.UserServiceImp;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

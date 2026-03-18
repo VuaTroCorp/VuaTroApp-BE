@@ -1,4 +1,4 @@
-package fpt.ntu.vuatrovn.service;
+package fpt.ntu.vuatrovn.service.user;
 
 import fpt.ntu.vuatrovn.dto.UserRequest;
 import fpt.ntu.vuatrovn.dto.UserResponse;
@@ -8,9 +8,7 @@ import fpt.ntu.vuatrovn.enums.OtpType;
 import fpt.ntu.vuatrovn.repository.OtpVerificationRepository;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import fpt.ntu.vuatrovn.service.email.EmailSender;
-import fpt.ntu.vuatrovn.service.email.EmailService;
 import fpt.ntu.vuatrovn.service.sms.SmsSender;
-import fpt.ntu.vuatrovn.service.sms.SmsService;
 import lombok.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -27,7 +25,7 @@ import java.util.Optional;
 @Getter
 @Setter
 @RequiredArgsConstructor
-public class UserService {
+public class UserServiceImp implements UserService{
     private final UserRepository userRepository;
 
     private final OtpVerificationRepository otpVerificationRepository;
@@ -37,6 +35,7 @@ public class UserService {
 
     private final EmailSender emailService;
 
+    @Override
     public UserResponse ConvertUserToDTo(User user){
         return UserResponse.builder()
                 .id(user.getId())
@@ -49,6 +48,7 @@ public class UserService {
                 .build();
     }
 
+    @Override
     public UserResponse getUserInfo(String email){
         User user = this.userRepository.findByEmail(email).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST,"Khong tim thay user")
@@ -58,6 +58,7 @@ public class UserService {
 
     }
 
+    @Override
     public String generatePhoneOtp(UserRequest request){
 
         /*Lấy thông tin đăng nhập của hệ thống*/
@@ -124,6 +125,7 @@ public class UserService {
         return "OTP đã được gửi tới số điện thoại " + request.getNewPhone() + "Vui long kiem tra SMS" ;
     }
 
+    @Override
     public String generateEmailOtp(UserRequest request) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -198,6 +200,7 @@ public class UserService {
     }
 
 //    Check Otp Email;
+    @Override
     public String verifyOtp(String targetEmail,String otp){
 
         OtpVerifications otpVerifications = this.otpVerificationRepository.findByTargetValueAndOtpAndType(targetEmail,otp,OtpType.EMAIL).orElseThrow(

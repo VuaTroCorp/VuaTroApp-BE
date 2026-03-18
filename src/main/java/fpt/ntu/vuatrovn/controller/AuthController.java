@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import fpt.ntu.vuatrovn.dto.UserResponse;
-import fpt.ntu.vuatrovn.service.UserService;
+import fpt.ntu.vuatrovn.service.user.UserServiceImp;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -22,13 +22,6 @@ import fpt.ntu.vuatrovn.dto.LoginResponse;
 import fpt.ntu.vuatrovn.dto.SignupRequest;
 import fpt.ntu.vuatrovn.service.AuthService;
 import fpt.ntu.vuatrovn.dto.*;
-import fpt.ntu.vuatrovn.service.AuthService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -37,10 +30,10 @@ public class AuthController {
 
     private final AuthService authService;
 
-    private final UserService userService;
-    public AuthController(AuthService authService,UserService userService) {
+    private final UserServiceImp userServiceImp;
+    public AuthController(AuthService authService, UserServiceImp userServiceImp) {
         this.authService = authService;
-        this.userService = userService;
+        this.userServiceImp = userServiceImp;
     }
 
     // =========================
@@ -87,7 +80,7 @@ public class AuthController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 //        Gọi service để lấy thông tin người dùng và gán lại cho dto
 
-        UserResponse response = this.userService.getUserInfo(authentication.getName());
+        UserResponse response = this.userServiceImp.getUserInfo(authentication.getName());
         return ResponseEntity.ok(response);
     }
     // 4️⃣ FORGOT PASSWORD (QUÊN MẬT KHẨU)
