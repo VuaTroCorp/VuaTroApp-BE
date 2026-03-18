@@ -49,6 +49,7 @@ public class Post {
     // ================= RELATIONSHIP =================
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(nullable = true)
     private List<Image> images;
 
     @ManyToOne
