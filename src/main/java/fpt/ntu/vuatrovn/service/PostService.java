@@ -211,7 +211,7 @@ public class PostService {
     // 6. GET ALL POSTS
     // ==========================================
     public Page<Post> getAllPosts(int page, int size){
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createAt").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return postRepository.findByStatus(PostStatus.APPROVED, pageable);
     }
 
@@ -222,7 +222,7 @@ public class PostService {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createAt").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return postRepository.findByUser(user, pageable);
     }
 }
