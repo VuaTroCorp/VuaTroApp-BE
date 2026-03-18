@@ -59,9 +59,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
-                    "/", "/home", "/login/**", "/oauth2/**",
-                    "/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", 
-                    "/swagger-ui.html", "/h2-console/**","/api/test/**", "/api/posts/**"
+                        "/", "/home", "/login/**", "/oauth2/**",
+                        "/api/auth/**","/api/user/**","/swagger-ui/**", "/v3/api-docs/**",
+                        "/swagger-ui.html", "/h2-console/**","/api/test/**", "/api/posts/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
