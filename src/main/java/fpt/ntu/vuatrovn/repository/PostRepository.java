@@ -1,7 +1,7 @@
 package fpt.ntu.vuatrovn.repository;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor; // Bổ sung import
 import org.springframework.stereotype.Repository;
@@ -12,6 +12,6 @@ import fpt.ntu.vuatrovn.enums.PostStatus;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificationExecutor<Post> {
-    List<Post> findByUser(User user);
-    List<Post> findByStatus(PostStatus status);
+    Page<Post> findByUser(User user, Pageable pageable);
+    Page<Post> findByStatus(PostStatus status, Pageable pageable);
 }

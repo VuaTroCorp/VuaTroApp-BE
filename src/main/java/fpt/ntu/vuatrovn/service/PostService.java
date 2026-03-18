@@ -1,10 +1,13 @@
 package fpt.ntu.vuatrovn.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -55,9 +58,9 @@ public class PostService {
         post.setTitle(request.getTitle());
         post.setPrice(request.getPrice());
         post.setArea(request.getArea());
-        post.setRoom_quantity(request.getRoomQuantity());
-        post.setAdrress(request.getAddress());
-        post.setDecription(request.getDescription());
+        post.setRoomQuantity(request.getRoomQuantity());
+        post.setAddress(request.getAddress());
+        post.setDescription(request.getDescription());
         post.setLatitude(request.getLatitude());
         post.setLongitude(request.getLongitude());
         post.setStatus(PostStatus.PENDING);
@@ -131,9 +134,9 @@ public class PostService {
         post.setTitle(request.getTitle());
         post.setPrice(request.getPrice());
         post.setArea(request.getArea());
-        post.setRoom_quantity(request.getRoomQuantity());
-        post.setAdrress(request.getAddress());
-        post.setDecription(request.getDescription());
+        post.setRoomQuantity(request.getRoomQuantity());
+        post.setAddress(request.getAddress());
+        post.setDescription(request.getDescription());
         post.setLatitude(request.getLatitude());
         post.setLongitude(request.getLongitude());
         post.setType(type);
@@ -205,20 +208,21 @@ public class PostService {
     }
 
     // ==========================================
-    // 6. GET ALL POSTS API
+    // 6. GET ALL POSTS
     // ==========================================
-    public List<Post> getAllPosts(){
-        return postRepository.findByStatus(PostStatus.APPROVED);
+    public Page<Post> getAllPosts(int page, int size){
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createAt").descending());
+        return postRepository.findByStatus(PostStatus.APPROVED, pageable);
     }
 
     // ==========================================
-    // 7. GET USER'S POSTS API
+    // 7. GET USER'S POSTS
     // ==========================================
-    public List<Post> getMyPosts(Long postId, String email) {
+    public Page<Post> getMyPosts(String email, int page, int size) {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-        return postRepository.findByUser(user);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createAt").descending());
+        return postRepository.findByUser(user, pageable);
     }
 }

@@ -25,7 +25,6 @@ import fpt.ntu.vuatrovn.dto.PostSearchRequest;
 import fpt.ntu.vuatrovn.dto.UpdatePostRequest;
 import fpt.ntu.vuatrovn.entity.Post;
 import fpt.ntu.vuatrovn.service.PostService;
-import fpt.ntu.vuatrovn.service.RentalRegistrationService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -35,7 +34,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
-@Tag(name = "Post API", description = "API quản lý bài đăng và upload ảnh")
+@Tag(name = "Post API", description = "Manage posts an upload images API")
 public class PostController {
 
     private final PostService postService;
@@ -55,7 +54,7 @@ public class PostController {
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("status", 401);
-            response.put("message", "Bạn chưa đăng nhập");
+            response.put("message", "User not logged in");
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(response);
@@ -68,7 +67,7 @@ public class PostController {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("status", 201);
-        response.put("message", "Tạo bài đăng thành công");
+        response.put("message", "Create post successfully");
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);
@@ -116,7 +115,7 @@ public class PostController {
     @PostMapping(value = "/edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Edit Post", description = "Choose a post to edit content of that post.")
     public ResponseEntity<?> updatePost(
-            @Parameter(description = "ID bài đăng") 
+            @Parameter(description = "Post ID") 
             @PathVariable Long id,
             @ModelAttribute UpdatePostRequest request,
             Authentication authentication
@@ -127,7 +126,7 @@ public class PostController {
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("status", 401);
-            response.put("message", "Bạn chưa đăng nhập");
+            response.put("message", "User not logged in");
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(response);
@@ -140,7 +139,7 @@ public class PostController {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("status", 200);
-        response.put("message", "Cập nhật bài đăng thành công");
+        response.put("message", "Update post successfully");
 
         return ResponseEntity.ok(response);
     }
@@ -157,7 +156,7 @@ public class PostController {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("status", 200);
-        response.put("message", "Cập nhật bài đăng thành công");
+        response.put("message", "Delete post successfully");
         return ResponseEntity.ok(response);
     }
 }
