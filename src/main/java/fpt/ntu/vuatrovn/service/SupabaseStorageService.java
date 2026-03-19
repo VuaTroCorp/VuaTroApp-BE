@@ -33,7 +33,7 @@ public class SupabaseStorageService {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("apikey", supabaseKey);
-        headers.set("Authorization", supabaseKey);
+        headers.set("Authorization", "Bearer" + supabaseKey);
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 
         HttpEntity<byte[]> request =

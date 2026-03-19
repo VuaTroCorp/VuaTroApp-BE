@@ -1,16 +1,11 @@
 package fpt.ntu.vuatrovn.config;
 import java.util.List;
 
-import fpt.ntu.vuatrovn.entity.User;
-import fpt.ntu.vuatrovn.security.JwtAuthenticationFilter;
-import fpt.ntu.vuatrovn.service.CustomOAuth2UserService;
-import fpt.ntu.vuatrovn.service.JwtService;
-import jakarta.servlet.http.HttpServletResponse; // 🔥 Import quan trọng
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import static org.springframework.security.config.Customizer.withDefaults;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity; // 🔥 Import quan trọng
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,6 +17,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import fpt.ntu.vuatrovn.entity.User;
+import fpt.ntu.vuatrovn.security.JwtAuthenticationFilter;
+import fpt.ntu.vuatrovn.service.CustomOAuth2UserService;
+import fpt.ntu.vuatrovn.service.JwtService;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -70,6 +71,7 @@ public class SecurityConfig {
             .addFilterBefore(jwtAuthenticationFilter,
                 UsernamePasswordAuthenticationFilter.class)
                 
+
         .oauth2Login(oauth2 -> oauth2
             .userInfoEndpoint(withDefaults())
             .successHandler((request, response, authentication) -> {
@@ -79,19 +81,20 @@ public class SecurityConfig {
                 String registrationId = ((OAuth2AuthenticationToken) authentication)
                         .getAuthorizedClientRegistrationId();
 
-                    User user = customOAuth2UserService.processOAuth2User(oAuth2User, registrationId);
+                User user = customOAuth2UserService.processOAuth2User(oAuth2User, registrationId);
 
-                    String token = jwtService.generateToken(
-                            user.getEmail(),
-                            user.getUsername(),
-                            user.getRole().name()
-                    );
+                String token = jwtService.generateToken(
+                        user.getEmail(),
+                        user.getUsername(),
+                        user.getRole().name()
+                );
 
-                response.setContentType("application/json");
-                response.getWriter().write("{\"token\":\"" + token + "\"}");
+                // 🔥 ĐÃ SỬA TẠI ĐÂY: Đá người dùng về Frontend cùng với Token
+                String redirectUrl = "http://localhost:3000/login/oauth2/code/google?token=" + token;
+                response.sendRedirect(redirectUrl);
             })
-            )
-            .headers(headers -> headers.frameOptions(frame -> frame.disable()));
+        )
+        .headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
         return http.build();
     }
