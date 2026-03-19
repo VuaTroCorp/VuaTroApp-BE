@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,26 +26,17 @@ import fpt.ntu.vuatrovn.repository.PostRepository;
 import fpt.ntu.vuatrovn.repository.TypeRepository;
 import fpt.ntu.vuatrovn.repository.UserRepository;
 import fpt.ntu.vuatrovn.specification.PostSpecification;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final TypeRepository typeRepository;
     private final SupabaseStorageService supabaseStorageService;
-
-    public PostService(PostRepository postRepository,
-                       UserRepository userRepository,
-                       TypeRepository typeRepository,
-                       SupabaseStorageService supabaseStorageService) {
-
-        this.postRepository = postRepository;
-        this.userRepository = userRepository;
-        this.typeRepository = typeRepository;
-        this.supabaseStorageService = supabaseStorageService;
-    }
 
     // ==========================================
     // 1. CREATE POST
@@ -57,16 +50,16 @@ public class PostService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Room type not found"));
 
         if (request.getPrice() == null || request.getPrice() <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Giá phải lớn hơn 0");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The price must be greater than 0.");
         }
 
         Post post = new Post();
         post.setTitle(request.getTitle());
         post.setPrice(request.getPrice());
         post.setArea(request.getArea());
-        post.setRoom_quantity(request.getRoomQuantity());
-        post.setAdrress(request.getAddress());
-        post.setDecription(request.getDescription());
+        post.setRoomQuantity(request.getRoomQuantity());
+        post.setAddress(request.getAddress());
+        post.setDescription(request.getDescription());
         post.setLatitude(request.getLatitude());
         post.setLongitude(request.getLongitude());
         post.setStatus(PostStatus.PENDING);
@@ -90,8 +83,7 @@ public class PostService {
                     images.add(image);
 
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    throw new RuntimeException("Upload ảnh thất bại");
+                    throw new RuntimeException("Upload image failed");
                 }
             }
         }
@@ -125,25 +117,25 @@ public class PostService {
     public void updatePost(Long postId, UpdatePostRequest request, String email) {
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post không tồn tại"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User không tồn tại"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         if (!post.getUser().getId().equals(user.getId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền sửa bài đăng này");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to edit this post.");
         }
 
         RoomType type = typeRepository.findById(request.getTypeId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Type không tồn tại"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Type not found"));
 
         // Update thông tin
         post.setTitle(request.getTitle());
         post.setPrice(request.getPrice());
         post.setArea(request.getArea());
-        post.setRoom_quantity(request.getRoomQuantity());
-        post.setAdrress(request.getAddress());
-        post.setDecription(request.getDescription());
+        post.setRoomQuantity(request.getRoomQuantity());
+        post.setAddress(request.getAddress());
+        post.setDescription(request.getDescription());
         post.setLatitude(request.getLatitude());
         post.setLongitude(request.getLongitude());
         post.setType(type);
@@ -168,7 +160,7 @@ public class PostService {
             });
         }
 
-        // Thêm ảnh mới
+        // Add new image
         if (request.getNewImages() != null && !request.getNewImages().isEmpty()) {
 
             int index = post.getImages().size();
@@ -200,17 +192,36 @@ public class PostService {
     public void deletePost(Long postId, String email) {
 
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post không tồn tại"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User không tồn tại"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         if (!post.getUser().getId().equals(user.getId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không có quyền xóa bài đăng này");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to delete this post.");
         }
 
         post.setStatus(PostStatus.DELETED);
 
         postRepository.save(post);
+    }
+
+    // ==========================================
+    // 6. GET ALL POSTS
+    // ==========================================
+    public Page<Post> getAllPosts(int page, int size){
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return postRepository.findByStatus(PostStatus.APPROVED, pageable);
+    }
+
+    // ==========================================
+    // 7. GET USER'S POSTS
+    // ==========================================
+    public Page<Post> getMyPosts(String email, int page, int size) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return postRepository.findByUser(user, pageable);
     }
 }

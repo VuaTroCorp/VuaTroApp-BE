@@ -21,7 +21,7 @@ public class Image {
     private int order_index;
 
     @ManyToOne
-    @JoinColumn(name = "post_id", nullable = false)
+    @JoinColumn(name = "post_id", nullable = true)
     @JsonIgnore
     private Post post;
 

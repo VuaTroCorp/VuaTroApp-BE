@@ -1,84 +1,76 @@
 package fpt.ntu.vuatrovn.entity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import fpt.ntu.vuatrovn.enums.PostStatus;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
-@Table(name="post")
-
+@Table(name = "post")
 public class Post {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long post_id;
+    private Long id;
 
     private String title;
+
     private Float price;
 
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING)
     private PostStatus status;
 
     private Float area;
-    private int room_quantity;
-    private String adrress;
 
-    public String getAdrress() {
-        return this.adrress;
-    }
+    @Column(name = "room_quantity")
+    private Integer roomQuantity;
 
-    public void setAdrress(String adrress) {
-        this.adrress = adrress;
-    }
+    private String address;
 
     @Column(columnDefinition = "LONGTEXT")
-    private String decription;
+    private String description;
 
     private Double longitude;
+
     private Double latitude;
+
+    // ================= RELATIONSHIP =================
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images;
 
-    public List<Image> getImages() {
-        return this.images;
-    }
-
-    public void setImages(List<Image> images) {
-        this.images = images;
-    }
-
     @ManyToOne
-    @JoinColumn(name = "id",nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "type_id", nullable = false)
     private RoomType type;
 
-    // Getter & Setter
-        public long getId() {
-        return this.post_id;
+    // ================= GETTER & SETTER =================
+
+    public Long getId() {
+        return id;
     }
 
-    public void setId(long post_id) {
-        this.post_id = post_id;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getTitle() {
-        return this.title;
+        return title;
     }
 
     public void setTitle(String title) {
@@ -86,15 +78,23 @@ public class Post {
     }
 
     public Float getPrice() {
-        return this.price;
+        return price;
     }
 
     public void setPrice(Float price) {
         this.price = price;
     }
 
-        public PostStatus getStatus() {
-        return this.status;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public PostStatus getStatus() {
+        return status;
     }
 
     public void setStatus(PostStatus status) {
@@ -102,31 +102,39 @@ public class Post {
     }
 
     public Float getArea() {
-        return this.area;
+        return area;
     }
 
     public void setArea(Float area) {
         this.area = area;
     }
 
-    public int getRoom_quantity() {
-        return this.room_quantity;
+    public Integer getRoomQuantity() {
+        return roomQuantity;
     }
 
-    public void setRoom_quantity(int room_quantity) {
-        this.room_quantity = room_quantity;
+    public void setRoomQuantity(Integer roomQuantity) {
+        this.roomQuantity = roomQuantity;
     }
 
-        public String getDecription() {
-        return this.decription;
+    public String getAddress() {
+        return address;
     }
 
-    public void setDecription(String decription) {
-        this.decription = decription;
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Double getLongitude() {
-        return this.longitude;
+        return longitude;
     }
 
     public void setLongitude(Double longitude) {
@@ -134,23 +142,31 @@ public class Post {
     }
 
     public Double getLatitude() {
-        return this.latitude;
+        return latitude;
     }
 
     public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
 
-        public User getUser() {
-        return this.user;
+    public List<Image> getImages() {
+        return images;
+    }
+
+    public void setImages(List<Image> images) {
+        this.images = images;
+    }
+
+    public User getUser() {
+        return user;
     }
 
     public void setUser(User user) {
         this.user = user;
     }
 
-        public RoomType getType() {
-        return this.type;
+    public RoomType getType() {
+        return type;
     }
 
     public void setType(RoomType type) {

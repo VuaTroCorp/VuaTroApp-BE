@@ -16,23 +16,16 @@ import fpt.ntu.vuatrovn.entity.User;
 import fpt.ntu.vuatrovn.repository.PostRepository;
 import fpt.ntu.vuatrovn.repository.ReviewRepository;
 import fpt.ntu.vuatrovn.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
-
-    // Tiêm các Repository vào thông qua Constructor
-    public ReviewService(ReviewRepository reviewRepository,
-                         UserRepository userRepository,
-                         PostRepository postRepository) {
-        this.reviewRepository = reviewRepository;
-        this.userRepository = userRepository;
-        this.postRepository = postRepository;
-    }
 
     public void createReview(CreateReviewRequest request, String email) {
         // 1. Validate dữ liệu đầu vào (Rating từ 1-5, Content không được rỗng)

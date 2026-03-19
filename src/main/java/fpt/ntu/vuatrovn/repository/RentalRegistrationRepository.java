@@ -10,5 +10,5 @@ public interface RentalRegistrationRepository
         extends JpaRepository<RentalRegistration, Long> {
 
     Optional<RentalRegistration> findByUserAndPost(User user, Post post);
-
+            
 }
