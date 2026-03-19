@@ -1,6 +1,5 @@
 package fpt.ntu.vuatrovn.controller;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,53 +18,67 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import fpt.ntu.vuatrovn.dto.CreatePostRequest;
 import fpt.ntu.vuatrovn.dto.PostSearchRequest;
 import fpt.ntu.vuatrovn.dto.UpdatePostRequest;
 import fpt.ntu.vuatrovn.entity.Post;
 import fpt.ntu.vuatrovn.service.PostService;
-import fpt.ntu.vuatrovn.service.SupabaseStorageService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/posts")
-@Tag(name = "Post API", description = "API quản lý bài đăng và upload ảnh")
+@RequiredArgsConstructor
+@Tag(name = "Post API", description = "Manage posts an upload images API")
 public class PostController {
 
     private final PostService postService;
-
-    public PostController(PostService postService) {
-        this.postService = postService;
-    }
 
     // ==========================================
     // 1. API TẠO BÀI ĐĂNG
     // ==========================================
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Create post", description = "Create a post with information about the room")
     public ResponseEntity<?> createPost(
             @ModelAttribute CreatePostRequest request,
             Authentication authentication
     ) {
-        // ⚠️ LƯU Ý: Phần code bên trong hàm này của bạn đã bị Git xóa mất lúc gộp code.
-        // Tạm thời trả về Mock Data để Build Success.
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "API Create Post đang được hoàn thiện");
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+        if (authentication == null) {
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("status", 401);
+            response.put("message", "User not logged in");
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(response);
+        }
+
+        String email = authentication.getName();
+
+        postService.createPost(request, email);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("status", 201);
+        response.put("message", "Create post successfully");
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(response);
     }
 
     // ==========================================
     // 2. API TÌM KIẾM BÀI ĐĂNG (Của bạn)
     // ==========================================
     @GetMapping("/search")
-    @Operation(summary = "Tìm kiếm bài đăng với bộ lọc động", 
-               description = "Hỗ trợ lọc theo từ khóa, khoảng giá, diện tích, khu vực.")
+    @Operation(summary = "Search for rooms using automatic filters.", 
+               description = "Supports filtering by keyword, price range, area, and location.")
     public ResponseEntity<Page<Post>> search(
             PostSearchRequest searchRequest,
             @Parameter(description = "Số trang (bắt đầu từ 0)") @RequestParam(defaultValue = "0") int page,
@@ -87,6 +100,7 @@ public class PostController {
     // 3. GET POST DETAIL
     // ==========================================  
     @GetMapping("/{id}")
+    @Operation(summary = "Get post detail", description = "Choose a post to get information about it.")
     public ResponseEntity<Post> getPostDetail(@PathVariable Long id) {
 
         Post post = postService.getPostDetail(id);
@@ -99,8 +113,9 @@ public class PostController {
     // 4. EDIT POST API
     // ==========================================   
     @PostMapping(value = "/edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Edit Post", description = "Choose a post to edit content of that post.")
     public ResponseEntity<?> updatePost(
-            @Parameter(description = "ID bài đăng") 
+            @Parameter(description = "Post ID") 
             @PathVariable Long id,
             @ModelAttribute UpdatePostRequest request,
             Authentication authentication
@@ -111,7 +126,7 @@ public class PostController {
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("status", 401);
-            response.put("message", "Bạn chưa đăng nhập");
+            response.put("message", "User not logged in");
 
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(response);
@@ -124,7 +139,7 @@ public class PostController {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("status", 200);
-        response.put("message", "Cập nhật bài đăng thành công");
+        response.put("message", "Update post successfully");
 
         return ResponseEntity.ok(response);
     }
@@ -133,6 +148,7 @@ public class PostController {
     // 5. DELETE POST API
     // ========================================== 
     @DeleteMapping("/delete/{id}")
+    @Operation(summary = "Delete post", description = "Choose a post to delete it (Soft Delete)")
     public ResponseEntity<?> deletePost(@PathVariable Long id, Authentication authentication){
         String email = authentication.getName();
         postService.deletePost(id, email);
@@ -140,7 +156,7 @@ public class PostController {
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("status", 200);
-        response.put("message", "Cập nhật bài đăng thành công");
+        response.put("message", "Delete post successfully");
         return ResponseEntity.ok(response);
     }
 }

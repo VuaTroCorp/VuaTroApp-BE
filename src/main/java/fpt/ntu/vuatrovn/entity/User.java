@@ -1,5 +1,7 @@
 package fpt.ntu.vuatrovn.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 // 🔥 CÁC DÒNG IMPORT QUAN TRỌNG ĐÃ ĐƯỢC BỔ SUNG
 import fpt.ntu.vuatrovn.enums.Provider;
 import fpt.ntu.vuatrovn.enums.Role;
@@ -25,6 +27,7 @@ public class User {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
+    @JsonIgnore
     @Column(name = "password")
     private String password;
 
@@ -42,4 +45,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToOne(mappedBy = "user")
+    private PasswordReset passwordReset;
 }

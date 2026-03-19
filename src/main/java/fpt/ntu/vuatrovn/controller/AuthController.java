@@ -1,33 +1,25 @@
 package fpt.ntu.vuatrovn.controller;
 
-import java.util.HashMap;
-import java.util.Map;
+import fpt.ntu.vuatrovn.dto.*;
+import fpt.ntu.vuatrovn.service.AuthService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import fpt.ntu.vuatrovn.dto.LoginRequest;
-import fpt.ntu.vuatrovn.dto.LoginResponse;
-import fpt.ntu.vuatrovn.dto.SignupRequest;
-import fpt.ntu.vuatrovn.service.AuthService;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Authentication API", description = "Account management API")
 @CrossOrigin("*")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
-
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
 
     // =========================
     // 1️⃣ SIGNUP (ĐĂNG KÝ)
@@ -66,5 +58,39 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    // 4️⃣ FORGOT PASSWORD (QUÊN MẬT KHẨU)
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> requestPasswordReset(@RequestBody ForgotPasswordRequest request){
+//        Check email và tạo otp
+        String content = this.authService.generateAndSendPasswordResetOtp(request);
+        return ResponseEntity.ok(content);
+    }
+
+    @GetMapping("/verify-resettoken-mail")
+    public ResponseEntity<?> verifyResetPasswordEmail(@RequestParam String resetToken){
+
+        String verifyResetPasswordEmail = this.authService.verifyPasswordResetOtpEmail(resetToken);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", 200);
+        response.put("message", "Xác thực thành công");
+        response.put("resetToken",verifyResetPasswordEmail);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 4️⃣.2 Change Password (QUÊN MẬT KHẨU)
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request){
+       if (!request.getComfirmPassword().equals(request.getNewPassword())){
+           return ResponseEntity.badRequest().body("Mật khẩu xác nhận không khớp");
+       }
+
+//       Check reset token;
+        String changePassword = this.authService.changePassword(request);
+
+        return ResponseEntity.ok(changePassword);
     }
 }
