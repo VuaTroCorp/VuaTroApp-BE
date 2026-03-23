@@ -79,8 +79,6 @@ void createPost_success() throws Exception {
     request.setRoomQuantity(1);
     request.setAddress("Nha Trang");
     request.setDescription("Phòng sạch");
-    request.setLatitude(12.238);
-    request.setLongitude(109.196);
     request.setTypeId(1L);
 
     MockMultipartFile file =
