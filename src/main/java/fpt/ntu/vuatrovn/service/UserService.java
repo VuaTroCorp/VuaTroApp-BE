@@ -127,32 +127,47 @@ public class UserService {
     public String generateEmailOtp(UserRequest request) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String emailUserName = authentication.getName();
+        String userID = authentication.getName();
+        System.out.printf(userID);
+        long userId = Long.parseLong(userID);
 
         String emailOtp = String.format(
                 "%06d",new SecureRandom().nextInt(1_000_000)
         );
 
-        User user = this.userRepository.findByEmail(emailUserName).orElseThrow(
+        User user = this.userRepository.findById(userId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "khong tim thay user")
         );
 
         /*Check email nhập xem có nhập hoặc trùng ko*/
         /*Check trùng với email hiện tại*/
-        if (user.getEmail().equals(request.getNewEmail())){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Ban da nhap lai email hien tai");
-        }
 
-        /*Check ko trùng vs email hiện tại nhưng trùng với email khác*/
-        if (userRepository.existsByEmail(request.getNewEmail())){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,request.getNewEmail() + "da duoc su dung");
+        boolean isSameEmail = user.getEmail().equals(request.getNewEmail());
+        boolean isSameUsername = request.getNewUserName() != null && user.getUsername().equals(request.getNewUserName());
+
+        // nhập lại email
+            if (isSameEmail){
+                // nhập lại username
+                if (isSameUsername){
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bạn đang nhập lại thông tin hiện tại");
+                }
+                // username khác
+                if (request.getNewUserName() != null && !request.getNewUserName().isBlank()){
+                    user.setUsername(request.getNewUserName());
+                    userRepository.save(user);
+                }
+                return "Cập nhật username thành công";
+            }
+
+        // Email thuộc user khác
+        if (!isSameEmail && userRepository.existsByEmail(request.getNewEmail())){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, request.getNewEmail() + " đã được sử dụng");
         }
 
         Optional<OtpVerifications> otpEmailVerifications = this.otpVerificationRepository.findByTargetValue(request.getNewEmail());
 
         /*Check xem có bản ghi chưa*/
         if (otpEmailVerifications.isPresent()){
-
 
             if (Instant.now().isAfter(otpEmailVerifications.get().getExpired_at())){
                 /*Có nhưng hết hạn*/
