@@ -25,15 +25,22 @@ public class SupabaseStorageService {
 
     private final RestTemplate restTemplate = new RestTemplate();
     
-    public String uploadFile(MultipartFile file) throws IOException{
-                String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
+        public String uploadFile(MultipartFile file) throws IOException {
+
+        if (supabaseUrl == null || !supabaseUrl.startsWith("http")) {
+                throw new RuntimeException("SUPABASE_URL sai: " + supabaseUrl);
+        }
+
+        String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
 
         String uploadUrl = supabaseUrl + "/storage/v1/object/"
                 + bucket + "/" + fileName;
 
+        System.out.println("UPLOAD URL: " + uploadUrl); // debug
+
         HttpHeaders headers = new HttpHeaders();
         headers.set("apikey", supabaseKey);
-        headers.set("Authorization", supabaseKey);
+        headers.set("Authorization", "Bearer " + supabaseKey); // ✅ FIX
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 
         HttpEntity<byte[]> request =
@@ -43,7 +50,7 @@ public class SupabaseStorageService {
 
         return supabaseUrl + "/storage/v1/object/public/"
                 + bucket + "/" + fileName;
-    }
+        }
 
     // Delete Image
     public void deleteFile(String fileUrl) {

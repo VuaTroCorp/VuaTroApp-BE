@@ -19,11 +19,11 @@ public class PostSpecification {
             predicates.add(cb.equal(root.get("status"), PostStatus.APPROVED));
 
             if (request != null) {
-                // 2. Tìm theo từ khóa (Tìm trong Title HOẶC Decription)
+                // 2. Tìm theo từ khóa (Tìm trong Title HOẶC Description)
                 if (request.getKeyword() != null && !request.getKeyword().trim().isEmpty()) {
                     String pattern = "%" + request.getKeyword().toLowerCase() + "%";
                     Predicate titleMatch = cb.like(cb.lower(root.get("title")), pattern);
-                    Predicate descMatch = cb.like(cb.lower(root.get("decription")), pattern); // Viết đúng theo tên biến của team
+                    Predicate descMatch = cb.like(cb.lower(root.get("description")), pattern); // Viết đúng theo tên biến của team
                     predicates.add(cb.or(titleMatch, descMatch));
                 }
 

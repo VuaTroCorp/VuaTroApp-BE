@@ -27,12 +27,6 @@ public class CreatePostRequest {
     @NotNull(message = "Type ID is required")
     private Long typeId;
 
-    @NotNull(message = "Latitude is required")
-    private Double latitude;
-
-    @NotNull(message = "Longitude is required")
-    private Double longitude;
-
     @NotBlank(message = "Address is required")
     private String address;
 
@@ -42,23 +36,6 @@ public class CreatePostRequest {
     private List<MultipartFile> images;
 
     // ================= GETTER SETTER =================
-
-    public Double getLatitude() {
-        return this.latitude;
-    }
-
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
-
-    public Double getLongitude() {
-        return this.longitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
-
     public Long getTypeId() {
         return this.typeId;
     }

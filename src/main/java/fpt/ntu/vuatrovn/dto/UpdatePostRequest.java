@@ -12,9 +12,6 @@ public class UpdatePostRequest {
 
     private Long typeId;
 
-    private Double latitude;
-    private Double longitude;
-
     private String address;
 
     private String description;
@@ -62,22 +59,6 @@ public class UpdatePostRequest {
 
     public void setTypeId(Long typeId) {
         this.typeId = typeId;
-    }
-
-    public Double getLatitude() {
-        return this.latitude;
-    }
-
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
-
-    public Double getLongitude() {
-        return this.longitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
     }
 
     public String getAddress() {
