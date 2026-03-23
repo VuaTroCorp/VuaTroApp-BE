@@ -42,10 +42,6 @@ public class Post {
     @Column(columnDefinition = "LONGTEXT")
     private String description;
 
-    private Double longitude;
-
-    private Double latitude;
-
     // ================= RELATIONSHIP =================
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -131,22 +127,6 @@ public class Post {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
-
-    public Double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
     }
 
     public List<Image> getImages() {

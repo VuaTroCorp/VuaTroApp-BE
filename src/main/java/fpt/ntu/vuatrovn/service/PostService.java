@@ -61,8 +61,6 @@ public class PostService {
         post.setRoomQuantity(request.getRoomQuantity());
         post.setAddress(request.getAddress());
         post.setDescription(request.getDescription());
-        post.setLatitude(request.getLatitude());
-        post.setLongitude(request.getLongitude());
         post.setStatus(PostStatus.PENDING);
         post.setUser(user);
         post.setType(type);
@@ -137,8 +135,6 @@ public class PostService {
         post.setRoomQuantity(request.getRoomQuantity());
         post.setAddress(request.getAddress());
         post.setDescription(request.getDescription());
-        post.setLatitude(request.getLatitude());
-        post.setLongitude(request.getLongitude());
         post.setType(type);
 
         // Xóa ảnh
