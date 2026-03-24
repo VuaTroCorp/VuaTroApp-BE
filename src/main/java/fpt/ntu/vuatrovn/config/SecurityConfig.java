@@ -60,7 +60,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers(
                     "/", "/home", "/login/**", "/oauth2/**",
-                    "/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**", 
+                    "/api/auth/**","/api/user/verify-otp", "/swagger-ui/**", "/v3/api-docs/**",
                     "/swagger-ui.html", "/h2-console/**","/api/test/**", "/api/posts/**",
                     "/api/home/**"
                 ).permitAll()
@@ -82,6 +82,7 @@ public class SecurityConfig {
                     User user = customOAuth2UserService.processOAuth2User(oAuth2User, registrationId);
 
                     String token = jwtService.generateToken(
+                            user.getId(),
                             user.getEmail(),
                             user.getUsername(),
                             user.getRole().name()

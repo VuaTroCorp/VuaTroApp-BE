@@ -38,6 +38,23 @@ public class JwtService {
                 .compact();
     }
 
+    // Tạo token chứa email + username + role
+    public String generateToken(long id,String email, String username, String role) {
+
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("username", username);
+        claims.put("role", role);
+        claims.put("email",email);
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(String.valueOf(id))
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
+                .signWith(getSignKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
     // Lấy toàn bộ claims
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
@@ -47,8 +64,11 @@ public class JwtService {
                 .getBody();
     }
 
-    public String extractEmail(String token) {
+    public String extractID(String token) {
         return extractAllClaims(token).getSubject();
+    }
+    public String extractEmail(String token) {
+        return extractAllClaims(token).get("email",String.class);
     }
 
     public String extractUsername(String token) {

@@ -7,6 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
@@ -40,7 +43,10 @@ public class UserController {
         /* chỉ có email */
         if (!hasPhone) {
             emailOtp = this.userService.generateEmailOtp(request);
-            return ResponseEntity.ok(emailOtp);
+            return ResponseEntity.ok(Map.of(
+                    "status", 200,
+                    "message",emailOtp
+            ));
         }
 
         /* có cả 2 */
